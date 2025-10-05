@@ -38,7 +38,7 @@
             font-size: 1.5em;
             font-weight: bold;
             color: white;
-            background-color: #f770a1; /* Hồng dịu */
+            background-color: #f770a1;
             border: none;
             border-radius: 10px;
             cursor: pointer;
@@ -50,7 +50,7 @@
             transform: scale(0.95);
         }
 
-        /* --- VÙNG HIỆU ỨNG (ẨN BAN ĐẦU) --- */
+        /* --- CÁC PHẦN TỬ HIỆU ỨNG --- */
         #heartCanvas {
             position: absolute;
             top: 0;
@@ -67,35 +67,33 @@
             align-items: center;
         }
 
-        /* Keyframes cho hiệu ứng Lấp Lánh Nhẹ nhàng */
+        /* Keyframes cho hiệu ứng Lấp Lánh Nhẹ nhàng (Trái tim & Chữ chính) */
         @keyframes subtleSparkle {
             0%, 100% { 
-                text-shadow: 0 0 5px #fff, 0 0 10px #f770a1; /* Lấp lánh trắng và hồng nhẹ */
+                text-shadow: 0 0 5px #fff, 0 0 10px #f770a1; 
                 filter: brightness(1.1);
             }
             50% { 
-                text-shadow: 0 0 8px #fff, 0 0 16px #ffc1e3; /* Tăng độ sáng nhẹ */
+                text-shadow: 0 0 8px #fff, 0 0 16px #ffc1e3; 
                 filter: brightness(1.2);
             }
         }
 
-        /* --- TRÁI TIM LỚN VÀ CHỮ --- */
         #big-heart-text {
-            /* Trái tim này chỉ là khung giữ chỗ và lấp lánh */
             font-size: 10em;
-            color: #ffb3c1; /* Hồng nhẹ */
+            color: #ffb3c1; 
             opacity: 0;
             transition: opacity 1s ease-out;
-            animation: subtleSparkle 1.5s infinite alternate 0s; /* Bắt đầu lấp lánh ngay */
+            animation: subtleSparkle 1.5s infinite alternate 0s;
             z-index: 3;
-            position: absolute; /* Quan trọng để nằm trên các hạt */
+            position: absolute;
         }
 
         #love-message {
-            margin-top: 150px; /* Xuống dưới trái tim */
+            margin-top: 150px; 
             font-size: 1.8em;
             font-weight: bold;
-            color: #ffffff; /* Màu trắng */
+            color: #ffffff;
             text-align: center;
             opacity: 0;
             transition: opacity 1.5s ease-in;
@@ -104,16 +102,48 @@
             position: absolute;
         }
         
-        /* --- CHỮ NHỎ BAY VÒNG TRÒN --- */
+        /* --- CHỮ NHỎ BAY VÒNG TRÒN (FIXED KEYFRAMES) --- */
         .flying-text {
             position: absolute;
             color: #fff;
             font-size: 0.8em;
             opacity: 0;
+            white-space: nowrap; 
             transition: opacity 0.5s;
-            white-space: nowrap; /* Giữ chữ không bị xuống dòng */
-            /* Keyframes cho chữ bay được định nghĩa trong JS */
         }
+        
+        /* Định nghĩa quỹ đạo bay ngẫu nhiên cho 5 dòng chữ */
+        @keyframes orbit1 {
+            0% { transform: translate(-50%, -50%) rotate(0deg) translateX(200px) rotate(0deg); opacity: 0; }
+            5% { opacity: 0.9; }
+            95% { opacity: 0.9; }
+            100% { transform: translate(-50%, -50%) rotate(360deg) translateX(200px) rotate(-360deg); opacity: 0; }
+        }
+        @keyframes orbit2 {
+            0% { transform: translate(-50%, -50%) rotate(10deg) translateX(250px) rotate(-10deg); opacity: 0; }
+            5% { opacity: 0.8; }
+            95% { opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) rotate(370deg) translateX(250px) rotate(-370deg); opacity: 0; }
+        }
+        @keyframes orbit3 {
+            0% { transform: translate(-50%, -50%) rotate(-20deg) translateX(150px) rotate(20deg); opacity: 0; }
+            5% { opacity: 0.7; }
+            95% { opacity: 0.7; }
+            100% { transform: translate(-50%, -50%) rotate(340deg) translateX(150px) rotate(-340deg); opacity: 0; }
+        }
+        @keyframes orbit4 {
+             0% { transform: translate(-50%, -50%) rotate(45deg) translateX(300px) rotate(-45deg); opacity: 0; }
+            5% { opacity: 0.9; }
+            95% { opacity: 0.9; }
+            100% { transform: translate(-50%, -50%) rotate(405deg) translateX(300px) rotate(-405deg); opacity: 0; }
+        }
+        @keyframes orbit5 {
+            0% { transform: translate(-50%, -50%) rotate(-30deg) translateX(180px) rotate(30deg); opacity: 0; }
+            5% { opacity: 0.85; }
+            95% { opacity: 0.85; }
+            100% { transform: translate(-50%, -50%) rotate(330deg) translateX(180px) rotate(-330deg); opacity: 0; }
+        }
+
     </style>
 </head>
 <body>
@@ -137,14 +167,13 @@
     </audio>
 
     <script>
-        // [CÁC HẰNG SỐ THỜI GIAN]
+        // [CÁC HẰNG SỐ VÀ BIẾN]
         const TOTAL_DURATION = 18000; 
-        const HEART_FLY_TIME = 8000; // Thời gian gom lại: 8 giây (trong khoảng 5-10s)
-        const HEART_APPEAR_TIME = HEART_FLY_TIME + 500; // Trái tim to xuất hiện 0.5s sau khi gom xong
-        const MESSAGE_APPEAR_TIME = HEART_APPEAR_TIME + 2500; // Dòng chữ chính xuất hiện 2.5s sau
+        const HEART_FLY_TIME = 8000; // 8 giây gom lại
+        const HEART_APPEAR_TIME = HEART_FLY_TIME + 500;
+        const MESSAGE_APPEAR_TIME = HEART_APPEAR_TIME + 2500;
         const FADE_OUT_TIME = TOTAL_DURATION - 2000;
 
-        // [CÁC BIẾN DOM]
         const canvas = document.getElementById('heartCanvas');
         const ctx = canvas.getContext('2d');
         const music = document.getElementById('backgroundMusic');
@@ -153,40 +182,31 @@
         const bigHeartText = document.getElementById('big-heart-text');
 
         let particles = [];
-        const NUM_PARTICLES = 300; // Tăng số lượng hạt
-        const screenW = window.innerWidth;
-        const screenH = window.innerHeight;
-        const CENTER_X = screenW / 2;
-        const CENTER_Y = screenH / 2;
-        const HEART_SCALE = screenW < 600 ? 0.7 : 1.0; // Thu nhỏ trên điện thoại
+        const NUM_PARTICLES = 300; 
         
-        canvas.width = screenW;
-        canvas.height = screenH;
-        
+        // Cần khởi tạo kích thước canvas ngay lập tức
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const CENTER_X = canvas.width / 2;
+        const CENTER_Y = canvas.height / 2;
+        const HEART_SCALE = canvas.width < 600 ? 0.7 : 1.0; 
+
         let animationStarted = false;
         let animationFrameId;
 
         // ==================================
         // HÀM TOÁN HỌC: TÍNH TOÁN HÌNH TRÁI TIM
         // ==================================
-        
-        /**
-         * Chuyển đổi tham số t thành tọa độ (x, y) trên hình trái tim (Cardioid)
-         * @param {number} t - Tham số góc (từ 0 đến 2 * PI)
-         * @param {number} scale - Kích thước trái tim
-         * @returns {object} {x, y}
-         */
         function getHeartPoint(t, scale) {
-            // Công thức trái tim Cardioid (Nguồn: Wikipedia)
-            const R = 150 * scale; // Bán kính tương đối
-            
-            // Dịch chuyển và biến đổi để tạo hình trái tim đứng
+            // Đã đơn giản hóa công thức để tăng tính ổn định
+            const R = 150 * scale; 
             const x = R * (16 * Math.sin(t) ** 3);
+            // Dịch chuyển 0.8*R để trái tim không bị thấp quá
             const y = -R * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
             
             return {
                 x: x, 
-                y: y + 50 * scale // Dịch chuyển lên để tâm trái tim nằm giữa màn hình
+                y: y + 0.8 * R 
             };
         }
 
@@ -196,21 +216,20 @@
 
         class HeartParticle {
             constructor(targetX, targetY) {
-                this.x = Math.random() * screenW; // Bắt đầu ngẫu nhiên
-                this.y = Math.random() * screenH;
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
                 this.targetX = targetX;
                 this.targetY = targetY;
-                this.size = Math.random() * 2 + 1; // Kích thước nhỏ 1-3px
-                this.color = `hsl(330, 80%, ${Math.random() * 20 + 75}%)`; // Hồng nhẹ
+                this.size = Math.random() * 2 + 1;
+                this.color = `hsl(330, 80%, ${Math.random() * 20 + 75}%)`;
                 this.opacity = 0;
-                this.delay = Math.random() * 1000; // Độ trễ xuất hiện
+                this.delay = Math.random() * 1000;
                 this.startTime = Date.now();
             }
 
             update() {
                 const elapsed = Date.now() - this.startTime;
                 
-                // Trễ trước khi bắt đầu bay
                 if (elapsed < this.delay) {
                     this.opacity = elapsed / this.delay;
                     return;
@@ -221,20 +240,15 @@
                 
                 if (progress > 1) {
                     progress = 1;
-                    this.opacity = 1; // Giữ nguyên độ mờ khi đến đích
+                    this.opacity = 1;
                 }
 
-                // Easing function (công thức di chuyển mượt mà)
+                // Easing function (làm mượt chuyển động)
                 const ease = 0.5 - 0.5 * Math.cos(progress * Math.PI);
 
-                // Di chuyển từ vị trí ngẫu nhiên đến vị trí mục tiêu
+                // Sử dụng hàm nội suy tuyến tính (lerp) để di chuyển mượt mà
                 this.x = this.x + (this.targetX - this.x) * ease * 0.1;
                 this.y = this.y + (this.targetY - this.y) * ease * 0.1;
-
-                // Tinh chỉnh để khi đến đích, hạt gần như dừng lại
-                if (progress > 0.9) {
-                    this.x = this.x * (1 - (progress - 0.9) * 10) + this.targetX * ((progress - 0.9) * 10);
-                }
             }
 
             draw() {
@@ -249,11 +263,9 @@
         function initParticles() {
             // Tính toán vị trí của từng hạt trên hình trái tim
             for (let i = 0; i < NUM_PARTICLES; i++) {
-                // Tạo một tham số ngẫu nhiên t (góc)
                 const t = Math.random() * Math.PI * 2; 
                 const { x, y } = getHeartPoint(t, HEART_SCALE);
                 
-                // Vị trí mục tiêu cuối cùng của hạt
                 const targetX = CENTER_X + x;
                 const targetY = CENTER_Y + y;
                 
@@ -265,55 +277,36 @@
         // LOGIC CHỮ NHỎ BAY (Flying Text)
         // ==================================
         const flyingMessage = "Gửi em món quà nhỏ bé iu Bích Chăm của anh,";
-        const flyingText = [];
         const NUM_FLYING_TEXT = 5;
 
         function createFlyingText() {
-            for (let i = 0; i < NUM_FLYING_TEXT; i++) {
+            for (let i = 1; i <= NUM_FLYING_TEXT; i++) { // Bắt đầu từ 1 để khớp với CSS
                 const div = document.createElement('div');
                 div.classList.add('flying-text');
                 div.textContent = flyingMessage;
                 document.body.appendChild(div);
-                flyingText.push(div);
                 
-                // Thiết lập animation ngẫu nhiên
-                const duration = 15 + Math.random() * 10; // 15s - 25s
-                const radius = 150 + Math.random() * 50; // Bán kính bay
-                const delay = Math.random() * 5; // Độ trễ bay
+                // Cần đặt vị trí trung tâm để animation orbit hoạt động
+                div.style.left = `${CENTER_X}px`;
+                div.style.top = `${CENTER_Y}px`;
                 
-                div.style.animation = `orbit${i} ${duration}s linear infinite`;
-                div.style.animationDelay = `${delay}s`;
+                // Gán keyframes đã định nghĩa sẵn trong CSS
+                div.style.animation = `orbit${i} 15s linear infinite`; 
+                div.style.animationDelay = `${Math.random() * 5}s`; // Độ trễ ngẫu nhiên
                 div.style.opacity = '1';
-                
-                // Thêm keyframes động vào CSS
-                const styleSheet = document.styleSheets[0];
-                const keyframes = `
-                    @keyframes orbit${i} {
-                        0% { 
-                            transform: translate(${CENTER_X}px, ${CENTER_Y}px) rotate(0deg) translate(${radius}px) rotate(0deg); 
-                            opacity: 0;
-                        }
-                        10% { opacity: 0.9; }
-                        90% { opacity: 0.9; }
-                        100% { 
-                            transform: translate(${CENTER_X}px, ${CENTER_Y}px) rotate(360deg) translate(${radius}px) rotate(-360deg); 
-                            opacity: 0;
-                        }
-                    }
-                `;
-                styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
             }
         }
         
         // ==================================
         // HÀM ANIMATE CHÍNH
         // ==================================
+        let lastTime = 0;
 
         function animate(currentTime) {
             const deltaTime = currentTime - lastTime;
             lastTime = currentTime;
 
-            ctx.clearRect(0, 0, screenW, screenH);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Cập nhật và vẽ các hạt trái tim
             for (let i = 0; i < particles.length; i++) {
@@ -335,7 +328,7 @@
 
         function startContentSequence() {
             document.getElementById('content-area').style.opacity = '1';
-            createFlyingText(); // Tạo các dòng chữ bay
+            createFlyingText(); 
 
             // 1. Trái tim to (khung lấp lánh) xuất hiện sau khi các hạt đã gom gần xong
             setTimeout(() => {
@@ -361,7 +354,8 @@
 
             // 1. KÍCH HOẠT NHẠC (Sự kiện chạm trực tiếp)
             music.play().catch(error => {
-                 // Sẽ ít xảy ra lỗi hơn vì đã có tương tác
+                console.error("Lỗi phát nhạc, có thể đường dẫn 'music1709.mp3' sai:", error);
+                // Dù nhạc lỗi vẫn cho chạy hiệu ứng hình ảnh
             });
 
             // 2. ẨN MÀN HÌNH CHỜ VÀ BẮT ĐẦU HIỆU ỨNG
@@ -369,7 +363,6 @@
             setTimeout(() => {
                 startScreen.style.display = 'none';
                 
-                // Bắt đầu chuỗi animation
                 initParticles();
                 animate(0); 
                 startContentSequence();
