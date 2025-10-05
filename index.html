@@ -1,226 +1,185 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quà Tặng Tinh Tế Cho Bích Chăm</title>
-    <style>
-        body {
-            background-color: #000;
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            color: #fff;
-            text-align: center;
-        }
+import turtle
+import random
+import time
+import sys
 
-        #canvasContainer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+# --- Cấu hình Màn hình ---
+screen = turtle.Screen()
+screen.setup(width=750, height=900)
+screen.bgcolor("black")
+screen.title("Dành Tặng Bích Chăm ❤️ - Lời Chúc Tình Yêu 20s")
+screen.tracer(0) 
 
-        /* Vùng chứa lời chúc */
-        #textZone {
-            position: absolute;
-            bottom: 5vh; 
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            width: 90vw;
-            pointer-events: none;
-        }
+# --- Hằng số và Cấu hình ---
+START_TIME = time.time()
+DURATION = 20 # Hoạt ảnh sẽ chạy trong 20 giây
+LOI_CHUC_COLORS = ["#FF69B4", "white", "#E77471", "#FFD700", "#ADD8E6"] # Hồng, Trắng, Đỏ San Hô, Vàng, Xanh Nhạt
+HEART_COLORS = ["red", "pink", "lightcoral", "#FFB6C1", "#DC143C"] # Đỏ, Hồng, Đỏ San Hô, Hồng Nhạt, Đỏ Thẫm
 
-        /* Phong cách cho dòng chữ */
-        .glowing-text {
-            display: block;
-            font-size: 1.3em; /* Kích thước chữ lớn hơn */
-            font-weight: bold;
-            color: #ffb6c1; /* Hồng nhạt */
-            opacity: 0;
-            margin-bottom: 12px;
-            /* Animation: Bay lên và nhấp nháy */
-            animation: textRise 2.5s forwards, textGlow 1.8s infinite alternate;
-        }
+# --- Danh sách Lời Chúc (Với tên Bích Chăm) ---
+LOI_CHUC = [
+    "Bích Chăm, anh yêu em nhiều lắm! ❤️",
+    "Mãi mãi là của nhau nhé, Bích Chăm! 💍",
+    "Chúc Bích Chăm luôn xinh đẹp & hạnh phúc! 😊",
+    "Em là nguồn sáng của đời anh, Bích Chăm!",
+    "Yêu em hơn cả lời nói! 💖",
+    "Gửi ngàn nụ hôn tới Bích Chăm! 😘",
+    "Cảm ơn em đã đến bên anh, Bích Chăm!",
+    "Tình yêu của chúng ta là mãi mãi!",
+    "Thế giới này thật đẹp vì có Bích Chăm!",
+    "Mỗi ngày bên em là một món quà! 🎁",
+    "Anh sẽ luôn nắm tay em, Bích Chăm!",
+    "Trái tim anh chỉ có hình bóng Bích Chăm!",
+    "Hạnh phúc là được thấy em cười! 😄",
+    "Bích Chăm là người tuyệt vời nhất!",
+    "Tình yêu này là vô tận! ✨"
+]
 
-        /* Điều chỉnh thời gian trễ cho từng dòng chữ */
-        .line-1 { animation-delay: 0.5s; }
-        .line-2 { animation-delay: 1.0s; }
-        .line-3 { animation-delay: 1.5s; }
-        .line-4 { animation-delay: 2.0s; }
+# --- Class đối tượng Lời Chúc ---
+class LờiChúc:
+    def __init__(self, message):
+        self.pen = turtle.Turtle()
+        self.pen.hideturtle()
+        self.pen.color(random.choice(LOI_CHUC_COLORS))
+        self.pen.penup()
         
-        /* Hiệu ứng bay từ dưới lên */
-        @keyframes textRise {
-            0% { opacity: 0; transform: translateY(150px) scale(0.9); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        # Vị trí xuất hiện ngẫu nhiên ở dưới đáy màn hình
+        self.x = random.uniform(-screen.window_width()/2 + 150, screen.window_width()/2 - 150)
+        self.y = -screen.window_height() / 2 - 50 
         
-        /* Hiệu ứng nhấp nháy/tỏa sáng */
-        @keyframes textGlow {
-            0% { text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff69b4; }
-            100% { text-shadow: 0 0 10px #ff69b4, 0 0 25px #ff69b4; }
-        }
+        self.pen.goto(self.x, self.y)
+        self.message = message
+        self.speed = random.uniform(1.0, 2.5) 
+        self.font_size = random.randint(14, 18)
 
-        /* Nút kích hoạt */
-        #startPrompt {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 15px 30px;
-            background: #ff69b4;
-            color: white;
-            border-radius: 10px;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 0 15px rgba(255, 105, 180, 0.8);
-            animation: pulse 1.5s infinite;
-        }
+    def move(self):
+        self.y += self.speed
+        self.pen.clear()
+        self.pen.goto(self.x, self.y)
+        self.pen.write(self.message, align="center", font=("Arial", self.font_size, "bold"))
 
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.05); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-    </style>
-</head>
-<body>
+    def is_visible(self):
+        return self.y < screen.window_height() / 2 + 50
 
-    <div id="canvasContainer">
-        <canvas id="heartCanvas"></canvas>
-    </div>
+    def cleanup(self):
+        self.pen.clear()
+        del self.pen
 
-    <audio id="myAudio" loop>
-        <source src="music1709.mp3" type="audio/mpeg">
-    </audio>
-    
-    <div id="textZone">
-        <span class="glowing-text line-1">Anh iu em nhiều lắm Bích Chăm! ❤️</span>
-        <span class="glowing-text line-2">Chúc mọi điều tốt đẹp diễn ra với em 🎉</span>
-        <span class="glowing-text line-3">Chúc em một đời an nhiên và luôn yêu anh như bây giờ ✨</span>
-        <span class="glowing-text line-4">Em là người tuyệt vời nhất của anh!</span>
-    </div>
+# --- Class đối tượng Trái Tim (Heart) ---
+class Tim:
+    def __init__(self):
+        self.pen = turtle.Turtle()
+        self.pen.hideturtle()
+        self.pen.shape("circle")
+        self.pen.shapesize(random.uniform(0.1, 0.4)) 
+        self.pen.color(random.choice(HEART_COLORS))
+        self.pen.penup()
 
-    <div id="startPrompt">
-        Chạm vào đây để xem món quà bí mật!
-    </div>
-
-    <script>
-        // --- CÁC HÀM XỬ LÝ CANVAS VÀ HẠT (PARTICLES) ---
-
-        const canvas = document.getElementById('heartCanvas');
-        const ctx = canvas.getContext('2d');
-        const particles = [];
-        let running = false;
-        let animationFrameId;
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function pointOnHeart(angle) {
-            const scale = Math.min(canvas.width, canvas.height) / 450;
-            const x = 16 * Math.pow(Math.sin(angle), 3) * scale;
-            const y = (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle)) * scale;
-            return {
-                x: canvas.width / 2 + x,
-                y: canvas.height / 2 - y - 100 * scale 
-            };
-        }
-
-        class Particle {
-            constructor() {
-                this.x = canvas.width / 2;
-                this.y = canvas.height / 2;
-                this.size = Math.random() * 1.5 + 0.5; // Giảm kích thước hạt
-                this.color = `hsl(${Math.random() * 30 + 330}, 100%, 70%)`;
-                this.target = pointOnHeart(Math.random() * Math.PI * 2);
-                this.vx = (Math.random() - 0.5) * 5;
-                this.vy = (Math.random() - 0.5) * 5;
-                this.speed = 0.03;
-                this.alpha = 0;
-            }
-
-            update() {
-                if (this.alpha < 1) this.alpha += 0.02;
-                
-                const dx = this.target.x - this.x;
-                const dy = this.target.y - this.y;
-                
-                if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-                     this.x += this.vx;
-                     this.y += this.vy;
-                } else {
-                    this.vx = dx * this.speed;
-                    this.vy = dy * this.speed;
-                    this.x += this.vx;
-                    this.y += this.vy;
-                }
-            }
-
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 500; i++) {
-            particles.push(new Particle());
-        }
-
-        function animate() {
-            if (!running) return;
-
-            // ĐÂY LÀ PHẦN ĐÃ ĐƯỢC CHỈNH SỬA ĐỂ GIẢM ĐỘ CHÓI
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)'; // Tăng độ mờ, làm tia sáng dịu đi
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalCompositeOperation = 'source-over'; // Chế độ vẽ bình thường
-            // KẾT THÚC PHẦN CHỈNH SỬA
-
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-
-            animationFrameId = requestAnimationFrame(animate);
-        }
-
-        // --- HÀM XỬ LÝ TƯƠNG TÁC VÀ NHẠC ---
+        # Vị trí xuất hiện ngẫu nhiên ở nửa dưới màn hình
+        self.x = random.uniform(-screen.window_width() / 2, screen.window_width() / 2)
+        self.y = random.uniform(-screen.window_height() / 2, -screen.window_height() / 2 + 150) 
         
-        const audio = document.getElementById('myAudio');
-        const startPrompt = document.getElementById('startPrompt');
-        const textZone = document.getElementById('textZone');
+        self.pen.goto(self.x, self.y)
+        self.speed_y = random.uniform(2.5, 4.5) 
+        self.speed_x = random.uniform(-1.5, 1.5) 
+        self.pen.showturtle()
+        self.initial_color = self.pen.color()[0]
 
-        function startEffect() {
-            if (running) return;
-            running = true;
+    def move(self):
+        self.y += self.speed_y
+        self.x += self.speed_x
+        self.pen.goto(self.x, self.y)
+        
+        # Hiệu ứng lấp lánh nhẹ
+        if random.random() < 0.1: # 10% cơ hội mỗi lần cập nhật
+             self.pen.color("white")
+        else:
+             self.pen.color(self.initial_color)
 
-            // Bắt đầu phát nhạc 
-            audio.play().catch(error => {
-                console.log("Tự động phát nhạc bị chặn:", error);
-            });
 
-            // Bắt đầu hiệu ứng Canvas
-            animate();
+    def is_visible(self):
+        return self.y < screen.window_height() / 2 + 50
 
-            // Ẩn nút kích hoạt
-            startPrompt.style.display = 'none';
+    def cleanup(self):
+        self.pen.hideturtle()
+        del self.pen
 
-            // Hiển thị lời chúc
-            textZone.style.opacity = 1;
-        }
+# --- Vòng lặp chính ---
+current_messages = []
+current_hearts = []
+last_message_time = time.time()
+last_heart_time = time.time()
+message_interval = 2.0 # Lời chúc xuất hiện nhanh hơn
+heart_interval = 0.05  # Trái tim xuất hiện rất nhanh và liên tục
 
-        // Kích hoạt khi người dùng chạm/click lần đầu
-        startPrompt.addEventListener('click', startEffect, { once: true });
-        startPrompt.addEventListener('touchstart', startEffect, { once: true });
-    </script>
-</body>
-</html>
+def create_new_message():
+    message = random.choice(LOI_CHUC)
+    new_message = LờiChúc(message)
+    current_messages.append(new_message)
+
+def create_new_hearts(count=4):
+    for _ in range(count):
+        new_heart = Tim()
+        current_hearts.append(new_heart)
+
+def animate():
+    global last_message_time, last_heart_time
+    current_time = time.time()
+    elapsed_time = current_time - START_TIME
+
+    # --- Kiểm tra điều kiện kết thúc (20 giây) ---
+    if elapsed_time > DURATION + 2: # Cộng thêm 2s để các đối tượng cuối kịp bay lên
+        # Dọn dẹp tất cả đối tượng còn lại và đóng chương trình
+        for item in current_messages + current_hearts:
+            try:
+                item.cleanup()
+            except:
+                pass
+        screen.bye()
+        return
+
+    # --- Tạo Lời Chúc mới ---
+    if current_time - last_message_time > message_interval and elapsed_time < DURATION:
+        create_new_message()
+        last_message_time = current_time
+
+    # --- Tạo Trái Tim mới (Liên tục) ---
+    if current_time - last_heart_time > heart_interval and elapsed_time < DURATION:
+        create_new_hearts(count=random.randint(3, 6)) 
+        last_heart_time = current_time
+
+    # --- Di chuyển và Xoá (Lời Chúc) ---
+    new_messages = []
+    for msg in current_messages:
+        msg.move()
+        if msg.is_visible():
+            new_messages.append(msg)
+        else:
+            msg.cleanup()
+    current_messages[:] = new_messages
+
+    # --- Di chuyển và Xoá (Trái Tim) ---
+    new_hearts = []
+    for heart in current_hearts:
+        heart.move()
+        if heart.is_visible():
+            new_hearts.append(heart)
+        else:
+            heart.cleanup()
+    current_hearts[:] = new_hearts
+
+
+    screen.update()
+    screen.ontimer(animate, 10) # Lặp lại hoạt ảnh sau 10ms
+
+# Bắt đầu hoạt ảnh
+animate()
+
+# Để chương trình chạy cho đến khi được gọi screen.bye()
+# Dùng try-except để tránh lỗi khi người dùng đóng cửa sổ
+try:
+    screen.mainloop()
+except turtle.Terminator:
+    print("Hoạt ảnh đã kết thúc.")
+except Exception as e:
+    print(f"Có lỗi xảy ra: {e}")
