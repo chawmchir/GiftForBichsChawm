@@ -1,185 +1,173 @@
-import turtle
-import random
-import time
-import sys
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lời Tỏ Tình Đặc Biệt Dành cho Bích Chăm ❤️</title>
+    <style>
+        /* ================================== */
+        /* Cài đặt cơ bản & Animation Keyframes */
+        /* ================================== */
+        body {
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-# --- Cấu hình Màn hình ---
-screen = turtle.Screen()
-screen.setup(width=750, height=900)
-screen.bgcolor("black")
-screen.title("Dành Tặng Bích Chăm ❤️ - Lời Chúc Tình Yêu 20s")
-screen.tracer(0) 
-
-# --- Hằng số và Cấu hình ---
-START_TIME = time.time()
-DURATION = 20 # Hoạt ảnh sẽ chạy trong 20 giây
-LOI_CHUC_COLORS = ["#FF69B4", "white", "#E77471", "#FFD700", "#ADD8E6"] # Hồng, Trắng, Đỏ San Hô, Vàng, Xanh Nhạt
-HEART_COLORS = ["red", "pink", "lightcoral", "#FFB6C1", "#DC143C"] # Đỏ, Hồng, Đỏ San Hô, Hồng Nhạt, Đỏ Thẫm
-
-# --- Danh sách Lời Chúc (Với tên Bích Chăm) ---
-LOI_CHUC = [
-    "Bích Chăm, anh yêu em nhiều lắm! ❤️",
-    "Mãi mãi là của nhau nhé, Bích Chăm! 💍",
-    "Chúc Bích Chăm luôn xinh đẹp & hạnh phúc! 😊",
-    "Em là nguồn sáng của đời anh, Bích Chăm!",
-    "Yêu em hơn cả lời nói! 💖",
-    "Gửi ngàn nụ hôn tới Bích Chăm! 😘",
-    "Cảm ơn em đã đến bên anh, Bích Chăm!",
-    "Tình yêu của chúng ta là mãi mãi!",
-    "Thế giới này thật đẹp vì có Bích Chăm!",
-    "Mỗi ngày bên em là một món quà! 🎁",
-    "Anh sẽ luôn nắm tay em, Bích Chăm!",
-    "Trái tim anh chỉ có hình bóng Bích Chăm!",
-    "Hạnh phúc là được thấy em cười! 😄",
-    "Bích Chăm là người tuyệt vời nhất!",
-    "Tình yêu này là vô tận! ✨"
-]
-
-# --- Class đối tượng Lời Chúc ---
-class LờiChúc:
-    def __init__(self, message):
-        self.pen = turtle.Turtle()
-        self.pen.hideturtle()
-        self.pen.color(random.choice(LOI_CHUC_COLORS))
-        self.pen.penup()
+        /* Keyframes cho hiệu ứng Lấp Lánh (Dùng cho cả Trái Tim và Chữ) */
+        @keyframes sparkle {
+            0%, 100% { 
+                text-shadow: 0 0 7px #fff, 0 0 14px #ffc107, 0 0 21px #ff9800; 
+                filter: brightness(1.2);
+            }
+            50% { 
+                text-shadow: 0 0 12px #fff, 0 0 24px #ff8a65, 0 0 36px #ff5722; 
+                filter: brightness(1.5);
+            }
+        }
         
-        # Vị trí xuất hiện ngẫu nhiên ở dưới đáy màn hình
-        self.x = random.uniform(-screen.window_width()/2 + 150, screen.window_width()/2 - 150)
-        self.y = -screen.window_height() / 2 - 50 
+        /* Keyframes cho Trái Tim Lớn xuất hiện */
+        @keyframes heartGrow {
+            0% { opacity: 0; transform: scale(0.1); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Keyframes cho Chữ xuất hiện */
+        @keyframes textSlideIn {
+            0% { opacity: 0; transform: translateY(50px) scale(0.8); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
         
-        self.pen.goto(self.x, self.y)
-        self.message = message
-        self.speed = random.uniform(1.0, 2.5) 
-        self.font_size = random.randint(14, 18)
+        /* Keyframes cho trái tim nhỏ bay (Giả lập) */
+        @keyframes particleFly {
+            0% { opacity: 1; transform: translate(var(--x1), var(--y1)) scale(0.5); }
+            50% { opacity: 0.8; }
+            100% { opacity: 0; transform: translate(var(--x2), var(--y2)) scale(0); }
+        }
 
-    def move(self):
-        self.y += self.speed
-        self.pen.clear()
-        self.pen.goto(self.x, self.y)
-        self.pen.write(self.message, align="center", font=("Arial", self.font_size, "bold"))
-
-    def is_visible(self):
-        return self.y < screen.window_height() / 2 + 50
-
-    def cleanup(self):
-        self.pen.clear()
-        del self.pen
-
-# --- Class đối tượng Trái Tim (Heart) ---
-class Tim:
-    def __init__(self):
-        self.pen = turtle.Turtle()
-        self.pen.hideturtle()
-        self.pen.shape("circle")
-        self.pen.shapesize(random.uniform(0.1, 0.4)) 
-        self.pen.color(random.choice(HEART_COLORS))
-        self.pen.penup()
-
-        # Vị trí xuất hiện ngẫu nhiên ở nửa dưới màn hình
-        self.x = random.uniform(-screen.window_width() / 2, screen.window_width() / 2)
-        self.y = random.uniform(-screen.window_height() / 2, -screen.window_height() / 2 + 150) 
+        /* ================================== */
+        /* Style cho Trái Tim Lớn */
+        /* ================================== */
+        #big-heart {
+            font-size: 10em; /* Kích thước lớn trên màn hình điện thoại */
+            color: #ff4081; /* Màu hồng ruby */
+            position: relative;
+            opacity: 0;
+            /* 1. Trái tim xuất hiện: Chạy trong 2s, bắt đầu ngay lập tức */
+            animation: heartGrow 2s forwards 0s;
+            /* 2. Hiệu ứng Lấp Lánh: Bắt đầu ngay sau khi xuất hiện */
+            animation-name: heartGrow, sparkle;
+            animation-duration: 2s, 1s;
+            animation-delay: 0s, 2s; /* Bắt đầu lấp lánh sau 2 giây */
+            animation-timing-function: ease-out, linear;
+            animation-fill-mode: forwards, both;
+            animation-iteration-count: 1, infinite; /* Lấp lánh lặp lại */
+        }
         
-        self.pen.goto(self.x, self.y)
-        self.speed_y = random.uniform(2.5, 4.5) 
-        self.speed_x = random.uniform(-1.5, 1.5) 
-        self.pen.showturtle()
-        self.initial_color = self.pen.color()[0]
+        /* ================================== */
+        /* Style cho Dòng Chữ */
+        /* ================================== */
+        #love-message {
+            margin-top: 30px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #e0f7fa; /* Màu xanh nhạt */
+            text-align: center;
+            opacity: 0;
+            
+            /* 1. Chữ xuất hiện: Chạy trong 1.5s, bắt đầu sau 3 giây (sau khi trái tim đã lấp lánh 1s) */
+            animation: textSlideIn 1.5s forwards 3s;
+            /* 2. Hiệu ứng Lấp Lánh Chữ: Bắt đầu sau khi chữ xuất hiện (delay 4.5s) */
+            animation-name: textSlideIn, sparkle;
+            animation-duration: 1.5s, 1s;
+            animation-delay: 3s, 4.5s; 
+            animation-timing-function: ease-out, linear;
+            animation-fill-mode: forwards, both;
+            animation-iteration-count: 1, infinite;
+            
+            /* Điều chỉnh bóng lấp lánh cho chữ nổi bật hơn */
+            --glow-color: #e0f7fa;
+            text-shadow: 
+                0 0 5px var(--glow-color), 
+                0 0 10px var(--glow-color);
+        }
 
-    def move(self):
-        self.y += self.speed_y
-        self.x += self.speed_x
-        self.pen.goto(self.x, self.y)
+        /* ================================== */
+        /* Style cho Trái Tim Nhỏ (Particles) */
+        /* ================================== */
+        .heart-particle {
+            position: absolute;
+            font-size: 1.2em;
+            color: #ff80ab; 
+            opacity: 0;
+            animation: particleFly 3s ease-in forwards;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="big-heart">❤️</div>
+
+    <h1 id="love-message">YÊU BÍCH CHĂM NHẤT TRÊN THẾ GIAN NÀY! ✨</h1>
+
+    <script>
+        const totalDuration = 18000; // Tổng thời gian chạy: 18 giây
+        const numParticles = 150; // Số lượng trái tim nhỏ (Tăng lên 150 để có vẻ 'nhiều')
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
         
-        # Hiệu ứng lấp lánh nhẹ
-        if random.random() < 0.1: # 10% cơ hội mỗi lần cập nhật
-             self.pen.color("white")
-        else:
-             self.pen.color(self.initial_color)
+        // Tạo các trái tim nhỏ bay
+        function createHeartParticles() {
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('heart-particle');
+                particle.innerHTML = '💖'; // Biểu tượng trái tim nhỏ
+                
+                // Vị trí bắt đầu ngẫu nhiên trên toàn màn hình
+                const startX = Math.random() * screenWidth;
+                const startY = Math.random() * screenHeight;
 
+                // Giả lập đường bay hướng vào trung tâm (vị trí trái tim lớn)
+                const endX = screenWidth / 2 + (Math.random() - 0.5) * 200; 
+                const endY = screenHeight / 2 + (Math.random() - 0.5) * 200; 
 
-    def is_visible(self):
-        return self.y < screen.window_height() / 2 + 50
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+                
+                // Thiết lập biến CSS cho animation
+                particle.style.setProperty('--x1', `0px`);
+                particle.style.setProperty('--y1', `0px`);
+                particle.style.setProperty('--x2', `${endX - startX}px`);
+                particle.style.setProperty('--y2', `${endY - startY}px`);
 
-    def cleanup(self):
-        self.pen.hideturtle()
-        del self.pen
+                // Độ trễ ngẫu nhiên: Các trái tim bay trong 0 đến 4 giây đầu tiên
+                particle.style.animationDelay = `${Math.random() * 4}s`; 
 
-# --- Vòng lặp chính ---
-current_messages = []
-current_hearts = []
-last_message_time = time.time()
-last_heart_time = time.time()
-message_interval = 2.0 # Lời chúc xuất hiện nhanh hơn
-heart_interval = 0.05  # Trái tim xuất hiện rất nhanh và liên tục
+                document.body.appendChild(particle);
+            }
+        }
+        
+        // 1. Chạy hiệu ứng trái tim nhỏ
+        createHeartParticles();
 
-def create_new_message():
-    message = random.choice(LOI_CHUC)
-    new_message = LờiChúc(message)
-    current_messages.append(new_message)
+        // 2. Thiết lập tổng thời gian chạy (18 giây)
+        setTimeout(() => {
+            // Sau 18 giây, làm mờ dần toàn bộ màn hình hoặc hiển thị thông báo kết thúc
+            document.body.style.transition = 'opacity 2s ease-out';
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.innerHTML = '<h1 style="color: #fff; font-size: 1.5em;">Mãi mãi chỉ yêu Bích Chăm ❤️</h1>';
+                document.body.style.opacity = '1';
+            }, 2000);
+        }, totalDuration);
 
-def create_new_hearts(count=4):
-    for _ in range(count):
-        new_heart = Tim()
-        current_hearts.append(new_heart)
-
-def animate():
-    global last_message_time, last_heart_time
-    current_time = time.time()
-    elapsed_time = current_time - START_TIME
-
-    # --- Kiểm tra điều kiện kết thúc (20 giây) ---
-    if elapsed_time > DURATION + 2: # Cộng thêm 2s để các đối tượng cuối kịp bay lên
-        # Dọn dẹp tất cả đối tượng còn lại và đóng chương trình
-        for item in current_messages + current_hearts:
-            try:
-                item.cleanup()
-            except:
-                pass
-        screen.bye()
-        return
-
-    # --- Tạo Lời Chúc mới ---
-    if current_time - last_message_time > message_interval and elapsed_time < DURATION:
-        create_new_message()
-        last_message_time = current_time
-
-    # --- Tạo Trái Tim mới (Liên tục) ---
-    if current_time - last_heart_time > heart_interval and elapsed_time < DURATION:
-        create_new_hearts(count=random.randint(3, 6)) 
-        last_heart_time = current_time
-
-    # --- Di chuyển và Xoá (Lời Chúc) ---
-    new_messages = []
-    for msg in current_messages:
-        msg.move()
-        if msg.is_visible():
-            new_messages.append(msg)
-        else:
-            msg.cleanup()
-    current_messages[:] = new_messages
-
-    # --- Di chuyển và Xoá (Trái Tim) ---
-    new_hearts = []
-    for heart in current_hearts:
-        heart.move()
-        if heart.is_visible():
-            new_hearts.append(heart)
-        else:
-            heart.cleanup()
-    current_hearts[:] = new_hearts
-
-
-    screen.update()
-    screen.ontimer(animate, 10) # Lặp lại hoạt ảnh sau 10ms
-
-# Bắt đầu hoạt ảnh
-animate()
-
-# Để chương trình chạy cho đến khi được gọi screen.bye()
-# Dùng try-except để tránh lỗi khi người dùng đóng cửa sổ
-try:
-    screen.mainloop()
-except turtle.Terminator:
-    print("Hoạt ảnh đã kết thúc.")
-except Exception as e:
-    print(f"Có lỗi xảy ra: {e}")
+    </script>
+</body>
+</html>
