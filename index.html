@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gửi Bích Chăm ❤️ Món Quà Nhỏ Bé</title>
     <style>
-        /* [Phần CSS giữ nguyên để đảm bảo hiệu ứng và màn hình chờ] */
         body {
             background-color: #000;
             margin: 0;
@@ -47,18 +46,7 @@
             transition: transform 0.2s;
         }
         
-        #start-button:active {
-            transform: scale(0.95);
-        }
-
         /* --- CÁC PHẦN TỬ HIỆU ỨNG --- */
-        #heartCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
         #content-area {
             position: absolute;
             z-index: 2;
@@ -66,6 +54,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            opacity: 0; /* Quan trọng: Ẩn toàn bộ khu vực nội dung ban đầu */
+            transition: opacity 1s ease-in;
         }
 
         /* Keyframes cho hiệu ứng Lấp Lánh Nhẹ nhàng (Trái tim & Chữ chính) */
@@ -80,27 +70,40 @@
             }
         }
 
+        /* DÙNG TRÁI TIM LỚN VÀ HIỆU ỨNG CSS ĐƠN GIẢN (KHÔNG CẦN CANVAS) */
         #big-heart-text {
             font-size: 10em;
             color: #ffb3c1; 
             opacity: 0;
-            transition: opacity 1s ease-out;
-            animation: subtleSparkle 1.5s infinite alternate 0s;
+            transition: opacity 1s ease-out 1s; /* Chậm 1 giây sau khi khu vực hiện ra */
+            animation: subtleSparkle 1.5s infinite alternate 2s; /* Lấp lánh sau 2 giây */
             z-index: 3;
-            position: absolute;
+            position: relative;
+            transform: scale(0.1); /* Bắt đầu nhỏ */
+            animation-name: subtleSparkle, heartGrow;
+            animation-duration: 1.5s, 1s;
+            animation-delay: 2s, 1s;
+            animation-timing-function: alternate, ease-out;
+            animation-iteration-count: infinite, 1;
+            animation-fill-mode: both, forwards;
+        }
+
+        @keyframes heartGrow {
+            0% { transform: scale(0.1); }
+            100% { transform: scale(1); }
         }
 
         #love-message {
-            margin-top: 150px; 
+            margin-top: 30px; 
             font-size: 1.8em;
             font-weight: bold;
             color: #ffffff;
             text-align: center;
             opacity: 0;
-            transition: opacity 1.5s ease-in;
-            animation: subtleSparkle 1.5s infinite alternate 0s;
+            transition: opacity 1.5s ease-in 3s; /* Chậm 3 giây để xuất hiện sau trái tim */
+            animation: subtleSparkle 1.5s infinite alternate 4s;
             z-index: 3;
-            position: absolute;
+            position: relative;
         }
         
         /* --- CHỮ NHỎ BAY VÒNG TRÒN (Đã cố định các keyframes) --- */
@@ -111,6 +114,10 @@
             opacity: 0;
             white-space: nowrap; 
             transition: opacity 0.5s;
+            /* Để ở trung tâm để animation CSS orbit hoạt động */
+            left: 50%; 
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
         
         /* Định nghĩa quỹ đạo bay ngẫu nhiên cho 5 dòng chữ */
@@ -148,8 +155,6 @@
     </style>
 </head>
 <body>
-    <canvas id="heartCanvas"></canvas>
-
     <div id="content-area">
         <div id="big-heart-text">❤️</div>
         <h1 id="love-message">YÊU BÍCH CHĂM NHẤT TRÊN THẾ GIAN NÀY! ✨</h1>
@@ -170,133 +175,19 @@
     <script>
         // [CÁC HẰNG SỐ VÀ BIẾN]
         const TOTAL_DURATION = 18000; 
-        const HEART_FLY_TIME = 8000; 
-        const HEART_APPEAR_TIME = HEART_FLY_TIME + 500;
-        const MESSAGE_APPEAR_TIME = HEART_APPEAR_TIME + 2500;
-        const FADE_OUT_TIME = TOTAL_DURATION - 2000;
-
-        const canvas = document.getElementById('heartCanvas');
-        const ctx = canvas.getContext('2d');
+        
         const music = document.getElementById('backgroundMusic');
         const startScreen = document.getElementById('start-screen');
         const startButton = document.getElementById('start-button');
-        const bigHeartText = document.getElementById('big-heart-text');
+        const contentArea = document.getElementById('content-area');
+        const NUM_FLYING_TEXT = 5;
 
-        let particles = [];
-        const NUM_PARTICLES = 300; 
-        
-        let CENTER_X, CENTER_Y, HEART_SCALE;
         let animationStarted = false;
-        let animationFrameId;
-        let lastTime = 0;
-        
-        // --- Hàm Khởi Tạo Kích Thước và Vị Trí (Rất Quan Trọng) ---
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            CENTER_X = canvas.width / 2;
-            CENTER_Y = canvas.height / 2;
-            HEART_SCALE = canvas.width < 600 ? 0.7 : 1.0; 
-            
-            // Đặt lại vị trí trung tâm cho chữ bay (vì chúng dùng CSS)
-            const flyingTextElements = document.querySelectorAll('.flying-text');
-            flyingTextElements.forEach(div => {
-                div.style.left = `${CENTER_X}px`;
-                div.style.top = `${CENTER_Y}px`;
-            });
-        }
-        
-        // Gọi hàm resize ngay khi tải và khi cửa sổ thay đổi
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
         
         // ==================================
-        // HÀM TOÁN HỌC: TÍNH TOÁN HÌNH TRÁI TIM
-        // ==================================
-        function getHeartPoint(t, scale) {
-            const R = 150 * scale; 
-            const x = R * (16 * Math.sin(t) ** 3);
-            const y = -R * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-            
-            return {
-                x: x, 
-                y: y + 0.8 * R 
-            };
-        }
-
-        // ==================================
-        // CLASS HẠT TRÁI TIM (PARTICLE)
-        // ==================================
-
-        class HeartParticle {
-            constructor(targetX, targetY) {
-                // Sửa lỗi: Đảm bảo hạt bắt đầu ngẫu nhiên trên toàn màn hình
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.targetX = targetX;
-                this.targetY = targetY;
-                this.size = Math.random() * 2 + 1;
-                this.color = `hsl(330, 80%, ${Math.random() * 20 + 75}%)`;
-                this.opacity = 0;
-                this.delay = Math.random() * 1000;
-                this.startTime = Date.now();
-                this.startPos = { x: this.x, y: this.y }; // Lưu vị trí bắt đầu
-            }
-
-            update() {
-                const elapsed = Date.now() - this.startTime;
-                
-                if (elapsed < this.delay) {
-                    this.opacity = elapsed / this.delay;
-                    return;
-                }
-                
-                const flightTime = elapsed - this.delay;
-                let progress = flightTime / HEART_FLY_TIME;
-                
-                if (progress > 1) {
-                    progress = 1;
-                    this.opacity = 1;
-                }
-
-                // Easing: Sử dụng công thức đơn giản và mượt mà hơn
-                const ease = progress * progress * (3 - 2 * progress); 
-                
-                // Nội suy tuyến tính giữa vị trí bắt đầu và vị trí mục tiêu
-                this.x = this.startPos.x + (this.targetX - this.startPos.x) * ease;
-                this.y = this.startPos.y + (this.targetY - this.startPos.y) * ease;
-            }
-
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.opacity;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function initParticles() {
-            // Tối ưu: Dọn dẹp hạt cũ nếu có
-            particles = []; 
-            // Tính toán vị trí của từng hạt trên hình trái tim
-            for (let i = 0; i < NUM_PARTICLES; i++) {
-                const t = Math.random() * Math.PI * 2; 
-                const { x, y } = getHeartPoint(t, HEART_SCALE);
-                
-                // Thêm một chút ngẫu nhiên nhỏ để các hạt không bị dính vào nhau hoàn toàn
-                const targetX = CENTER_X + x + (Math.random() - 0.5) * 5; 
-                const targetY = CENTER_Y + y + (Math.random() - 0.5) * 5;
-                
-                particles.push(new HeartParticle(targetX, targetY));
-            }
-        }
-
-        // ==================================
-        // LOGIC CHỮ NHỎ BAY
+        // LOGIC CHỮ NHỎ BAY (Sử dụng CSS)
         // ==================================
         const flyingMessage = "Gửi em món quà nhỏ bé iu Bích Chăm của anh,";
-        const NUM_FLYING_TEXT = 5;
 
         function createFlyingText() {
             for (let i = 1; i <= NUM_FLYING_TEXT; i++) { 
@@ -305,80 +196,43 @@
                 div.textContent = flyingMessage;
                 document.body.appendChild(div);
                 
-                div.style.left = `${CENTER_X}px`;
-                div.style.top = `${CENTER_Y}px`;
-                
+                // Kích hoạt animation CSS
                 div.style.animation = `orbit${i} 15s linear infinite`; 
                 div.style.animationDelay = `${Math.random() * 5}s`; 
                 div.style.opacity = '1';
             }
         }
-        
-        // ==================================
-        // HÀM ANIMATE CHÍNH
-        // ==================================
-        function animate(currentTime) {
-            const deltaTime = currentTime - lastTime;
-            lastTime = currentTime;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-            }
-
-            if (currentTime < TOTAL_DURATION) {
-                animationFrameId = requestAnimationFrame(animate);
-            } else {
-                cancelAnimationFrame(animationFrameId);
-                music.pause();
-            }
-        }
 
         // ==================================
-        // LOGIC CHẠM VÀ THỜI GIAN
+        // LOGIC CHẠM VÀ HIỂN THỊ
         // ==================================
 
-        function startContentSequence() {
-            document.getElementById('content-area').style.opacity = '1';
-            createFlyingText(); 
-
-            setTimeout(() => {
-                bigHeartText.style.opacity = '1';
-            }, HEART_APPEAR_TIME);
-
-            setTimeout(() => {
-                document.getElementById('love-message').style.opacity = '1';
-            }, MESSAGE_APPEAR_TIME);
-
-            setTimeout(() => {
-                document.body.style.transition = 'opacity 2s ease-out';
-                document.body.style.opacity = '0';
-            }, FADE_OUT_TIME);
-        }
-
-        // --- Sự kiện Chạm để BẮT ĐẦU ---
         startButton.addEventListener('click', () => {
             if (animationStarted) return;
             animationStarted = true;
-            lastTime = performance.now(); // Khởi tạo thời gian bắt đầu
 
             // 1. KÍCH HOẠT NHẠC
             music.play().catch(error => {
                 console.error("Lỗi phát nhạc:", error);
             });
 
-            // 2. ẨN MÀN HÌNH CHỜ VÀ BẮT ĐẦU HIỆU ỨNG
+            // 2. ẨN MÀN HÌNH CHỜ
             startScreen.style.opacity = '0';
             setTimeout(() => {
                 startScreen.style.display = 'none';
                 
-                initParticles(); // Tạo các hạt
-                animate(lastTime); // Bắt đầu vòng lặp vẽ
-                startContentSequence(); // Bắt đầu chuỗi hiển thị chữ
+                // 3. BẮT ĐẦU HIỂN THỊ NỘI DUNG VÀ HIỆU ỨNG CSS
+                contentArea.style.opacity = '1'; // Cho khu vực nội dung hiện ra
+                createFlyingText(); // Bắt đầu tạo chữ bay
                 
-            }, 1000); 
+            }, 1000); // Đợi màn hình chờ mờ đi (1 giây)
+
+            // 4. Dừng toàn bộ sau 18 giây
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 2s ease-out';
+                document.body.style.opacity = '0';
+                music.pause();
+            }, TOTAL_DURATION); 
 
         });
     </script>
