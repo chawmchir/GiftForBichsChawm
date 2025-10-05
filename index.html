@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quà Tặng Tối Ưu Cho Bích Chăm</title>
+    <title>Quà Tặng Tinh Tế Cho Bích Chăm</title>
     <style>
         body {
             background-color: #000;
@@ -36,30 +36,31 @@
         /* Phong cách cho dòng chữ */
         .glowing-text {
             display: block;
-            font-size: 1.2em; /* Kích thước chữ */
+            font-size: 1.3em; /* Kích thước chữ lớn hơn */
             font-weight: bold;
             color: #ffb6c1; /* Hồng nhạt */
-            text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4; /* Hiệu ứng sáng rực */
             opacity: 0;
-            margin-bottom: 10px;
-            animation: textRise 2s forwards, textGlow 1.5s infinite alternate;
+            margin-bottom: 12px;
+            /* Animation: Bay lên và nhấp nháy */
+            animation: textRise 2.5s forwards, textGlow 1.8s infinite alternate;
         }
 
+        /* Điều chỉnh thời gian trễ cho từng dòng chữ */
         .line-1 { animation-delay: 0.5s; }
         .line-2 { animation-delay: 1.0s; }
         .line-3 { animation-delay: 1.5s; }
         .line-4 { animation-delay: 2.0s; }
-
-        /* Hiệu ứng bay từ dưới lên (Mô phỏng 3D) */
+        
+        /* Hiệu ứng bay từ dưới lên */
         @keyframes textRise {
-            0% { opacity: 0; transform: translateY(100px) scale(0.8); }
+            0% { opacity: 0; transform: translateY(150px) scale(0.9); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         
         /* Hiệu ứng nhấp nháy/tỏa sáng */
         @keyframes textGlow {
             0% { text-shadow: 0 0 5px #ff69b4, 0 0 10px #ff69b4; }
-            100% { text-shadow: 0 0 15px #ff69b4, 0 0 30px #ff69b4; }
+            100% { text-shadow: 0 0 10px #ff69b4, 0 0 25px #ff69b4; }
         }
 
         /* Nút kích hoạt */
@@ -74,14 +75,14 @@
             border-radius: 10px;
             cursor: pointer;
             z-index: 100;
-            box-shadow: 0 0 20px #ff69b4;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.8);
             animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 10px #ff69b4; }
-            50% { box-shadow: 0 0 25px #ff69b4; }
-            100% { box-shadow: 0 0 10px #ff69b4; }
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
     </style>
 </head>
@@ -103,7 +104,7 @@
     </div>
 
     <div id="startPrompt">
-        Chạm vào đây để xem món quà bí mật! ❤️
+        Chạm vào đây để xem món quà bí mật!
     </div>
 
     <script>
@@ -122,7 +123,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Công thức vẽ trái tim (Cardioid)
         function pointOnHeart(angle) {
             const scale = Math.min(canvas.width, canvas.height) / 450;
             const x = 16 * Math.pow(Math.sin(angle), 3) * scale;
@@ -137,7 +137,7 @@
             constructor() {
                 this.x = canvas.width / 2;
                 this.y = canvas.height / 2;
-                this.size = Math.random() * 2 + 1;
+                this.size = Math.random() * 1.5 + 0.5; // Giảm kích thước hạt
                 this.color = `hsl(${Math.random() * 30 + 330}, 100%, 70%)`;
                 this.target = pointOnHeart(Math.random() * Math.PI * 2);
                 this.vx = (Math.random() - 0.5) * 5;
@@ -179,9 +179,11 @@
         function animate() {
             if (!running) return;
 
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            // ĐÂY LÀ PHẦN ĐÃ ĐƯỢC CHỈNH SỬA ĐỂ GIẢM ĐỘ CHÓI
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)'; // Tăng độ mờ, làm tia sáng dịu đi
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalCompositeOperation = 'lighter'; 
+            ctx.globalCompositeOperation = 'source-over'; // Chế độ vẽ bình thường
+            // KẾT THÚC PHẦN CHỈNH SỬA
 
             particles.forEach(p => {
                 p.update();
@@ -219,7 +221,6 @@
         // Kích hoạt khi người dùng chạm/click lần đầu
         startPrompt.addEventListener('click', startEffect, { once: true });
         startPrompt.addEventListener('touchstart', startEffect, { once: true });
-
     </script>
 </body>
 </html>
