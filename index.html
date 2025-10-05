@@ -3,49 +3,29 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yêu Bích Chăm 💖</title>
+<title>Trái Tim Bích Chăm 💖</title>
 <style>
   html, body {
     margin: 0;
     padding: 0;
+    background: #000;
     overflow: hidden;
-    background: radial-gradient(circle at center, #ff99cc, #660033);
     height: 100vh;
   }
 
   canvas {
     position: absolute;
-    top: 0; left: 0;
-  }
-
-  h1 {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    top: 45%;
-    font-family: 'Comic Sans MS', cursive;
-    font-size: 2em;
-    color: #fff;
-    text-shadow: 0 0 20px #ff66cc, 0 0 40px #ff0066;
-    animation: sparkle 2s infinite;
-    opacity: 0;
-    transition: opacity 1.5s ease-in;
-  }
-
-  @keyframes sparkle {
-    0% { text-shadow: 0 0 5px #ff99cc, 0 0 10px #ff33cc; }
-    50% { text-shadow: 0 0 20px #ff66cc, 0 0 40px #ff0066; }
-    100% { text-shadow: 0 0 5px #ff99cc, 0 0 10px #ff33cc; }
+    top: 0;
+    left: 0;
   }
 </style>
 </head>
 <body>
-<canvas id="hearts"></canvas>
-<h1 id="text">Yêu Bích Chăm nhất trên thế gian này 💞</h1>
+<canvas id="canvas"></canvas>
 <audio id="music" src="music1709.mp3" autoplay></audio>
 
 <script>
-const canvas = document.getElementById('hearts');
+const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let W = canvas.width = window.innerWidth;
 let H = canvas.height = window.innerHeight;
@@ -54,10 +34,17 @@ window.addEventListener('resize', () => {
   H = canvas.height = window.innerHeight;
 });
 
-let hearts = [];
-const num = 1200;
-for (let i = 0; i < num; i++) {
-  hearts.push({
+function heartShape(t) {
+  const x = 16 * Math.pow(Math.sin(t), 3);
+  const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+  return {x, y};
+}
+
+const particles = [];
+const numParticles = 1000;
+
+for (let i = 0; i < numParticles; i++) {
+  particles.push({
     x: Math.random() * W,
     y: Math.random() * H,
     size: Math.random() * 2 + 1,
@@ -67,54 +54,48 @@ for (let i = 0; i < num; i++) {
   });
 }
 
-function drawHeart(x, y, size, color) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.scale(size, size);
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.bezierCurveTo(-2, -2, -2, -6, 0, -8);
-  ctx.bezierCurveTo(2, -6, 2, -2, 0, 0);
-  ctx.fillStyle = color;
-  ctx.fill();
-  ctx.restore();
-}
-
 let time = 0;
 function animate() {
   ctx.clearRect(0, 0, W, H);
-  time += 0.01;
+  time += 0.02;
 
-  hearts.forEach(h => {
-    h.y += h.speedY;
-    if (h.y > H) {
-      h.y = -10;
-      h.x = Math.random() * W;
+  const scale = 20 + Math.sin(time * 2) * 2; // nhịp đập nhẹ
+  const cx = W / 2;
+  const cy = H / 2;
+
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+
+    // di chuyển tự do
+    p.y += p.speedY;
+    if (p.y > H) {
+      p.y = -10;
+      p.x = Math.random() * W;
     }
 
-    // tạo chuyển động tập trung lại thành hình trái tim lớn
-    const t = time * 0.5;
-    const heartX = 16 * Math.pow(Math.sin(t), 3);
-    const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-
-    const centerX = W / 2;
-    const centerY = H / 2;
-
-    const targetX = centerX + heartX * 20;
-    const targetY = centerY + heartY * 20;
-
-    if (time > 5 && time < 12) {
-      h.x += (targetX - h.x) * 0.01;
-      h.y += (targetY - h.y) * 0.01;
+    // hướng về trái tim lớn
+    if (time > 2) {
+      const t = (i / numParticles) * Math.PI * 2;
+      const h = heartShape(t);
+      const targetX = cx + h.x * scale;
+      const targetY = cy + h.y * scale;
+      p.x += (targetX - p.x) * 0.015;
+      p.y += (targetY - p.y) * 0.015;
     }
 
-    const color = `rgba(255, ${100+Math.random()*155}, ${150+Math.random()*105}, ${h.alpha})`;
-    drawHeart(h.x, h.y, h.size, color);
-  });
+    // màu trái tim
+    const r = 255;
+    const g = 100 + Math.sin(p.phase + time) * 50;
+    const b = 150 + Math.cos(p.phase + time) * 50;
+    const a = 0.7 + Math.sin(time + i) * 0.3;
+    ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
 
-  // sau 12s hiện chữ
-  if (time > 12) {
-    document.getElementById('text').style.opacity = 1;
+    // vẽ trái tim nhỏ
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.bezierCurveTo(p.x - p.size, p.y - p.size, p.x - p.size, p.y - 3*p.size, p.x, p.y - 3.5*p.size);
+    ctx.bezierCurveTo(p.x + p.size, p.y - 3*p.size, p.x + p.size, p.y - p.size, p.x, p.y);
+    ctx.fill();
   }
 
   requestAnimationFrame(animate);
@@ -124,9 +105,9 @@ animate();
 
 // Tự động bật nhạc
 const music = document.getElementById('music');
-music.volume = 0.5;
+music.volume = 0.6;
 music.play().catch(() => {
-  // Một số trình duyệt cần click để phát, có thể thêm hướng dẫn nếu muốn
+  console.log("Trình duyệt chặn tự động phát nhạc — hãy chạm màn hình để phát 🎵");
 });
 </script>
 </body>
