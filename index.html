@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quà Tặng Tình Yêu Của Anh Dành Cho Bích Chăm</title>
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden; 
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        #message {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            margin-top: 20px;
+            animation: fadeIn 3s ease-in-out forwards;
+            opacity: 0;
+            cursor: pointer; /* Thêm con trỏ để gợi ý click */
+        }
+
+        #message h1 {
+            color: #ff69b4; 
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #ff69b4; /* Hiệu ứng sáng mờ */
+        }
+
+        #message p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        .heart {
+            position: absolute;
+            top: -10vh; 
+            font-size: 20px;
+            color: #ff69b4; 
+            transform: rotate(-20deg);
+            pointer-events: none; 
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(105vh) rotate(20deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Thêm thông báo "Chạm để bắt đầu" */
+        #tapToStart {
+            position: absolute;
+            z-index: 20;
+            bottom: 10%;
+            font-size: 1em;
+            color: yellow;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+          
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="myAudio" loop>
+        <source src="music1709.mp3" type="audio/mpeg">
+        Trình duyệt của bạn không hỗ trợ phát nhạc.
+    </audio>
+
+    <div id="message">
+        <h1>Anh Iu Em Nhiều Lắm, Bích Chăm!</h1>
+        <p>Chúc mọi điều tốt đẹp nhất sẽ diễn ra với em.</p>
+        <p>Chúc em một đời an nhiên, hạnh phúc và luôn yêu anh nhé!</p>
+        <p>Yêu em mãi mãi! ❤️</p>
+    </div>
+
+    <div id="tapToStart">
+        (Chạm vào màn hình để bắt đầu hiệu ứng và phát nhạc)
+    </div>
+
+    <script>
+        const body = document.body;
+        const heartCount = 50;
+        const audio = document.getElementById('myAudio');
+        const messageBox = document.getElementById('message');
+        const tapToStart = document.getElementById('tapToStart');
+        let isStarted = false;
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '💖'; 
+
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = Math.random() * 5 + 5 + 's'; 
+            heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+
+            body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, parseFloat(heart.style.animationDuration) * 1000);
+        }
+
+        function startEffect() {
+            if (isStarted) return;
+            isStarted = true;
+
+            // Bắt đầu phát nhạc
+            audio.play().catch(error => {
+                console.log("Tự động phát nhạc bị chặn:", error);
+                // Có thể hiển thị thông báo để người dùng bật nhạc thủ công
+            });
+
+            // Bắt đầu hiệu ứng trái tim
+            setInterval(createHeart, 200);
+
+            // Ẩn thông báo "Chạm để bắt đầu"
+            tapToStart.style.display = 'none';
+
+            // Kích hoạt lại hiệu ứng fadeIn cho lời nhắn
+            messageBox.style.opacity = 0;
+            messageBox.style.animation = 'fadeIn 3s ease-in-out forwards';
+        }
+
+        // Kích hoạt khi người dùng chạm/click lần đầu (Cần thiết cho phát nhạc trên di động)
+        document.addEventListener('click', startEffect, { once: true });
+        document.addEventListener('touchstart', startEffect, { once: true });
+
+    </script>
+
+</body>
+</html>
