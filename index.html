@@ -1,186 +1,133 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gửi Bích Chăm của Anh ❤️</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script> 
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yêu Bích Chăm 💖</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #ff99cc, #660033);
+    height: 100vh;
+  }
 
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden; 
-            background-color: #000000;
-            font-family: sans-serif;
-            color: white;
-        }
-        #welcome-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5em;
-            cursor: pointer;
-            z-index: 100;
-            text-align: center;
-        }
-        @keyframes flicker {
-            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { 
-                opacity: 1;
-                text-shadow: 0 0 5px #fff, 0 0 10px #fff;
-            }
-            20%, 24%, 55% {    
-                opacity: 0.8;
-                text-shadow: none;
-            }
-        }
-        #welcome-screen p {
-            animation: flicker 2s linear infinite;
-            padding: 10px;
-        }
-    </style>
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  h1 {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 45%;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 2em;
+    color: #fff;
+    text-shadow: 0 0 20px #ff66cc, 0 0 40px #ff0066;
+    animation: sparkle 2s infinite;
+    opacity: 0;
+    transition: opacity 1.5s ease-in;
+  }
+
+  @keyframes sparkle {
+    0% { text-shadow: 0 0 5px #ff99cc, 0 0 10px #ff33cc; }
+    50% { text-shadow: 0 0 20px #ff66cc, 0 0 40px #ff0066; }
+    100% { text-shadow: 0 0 5px #ff99cc, 0 0 10px #ff33cc; }
+  }
+</style>
 </head>
 <body>
-    <div id="welcome-screen">
-        <p>Bấm vào bất kỳ đâu để nhận món quà nhỏ bé iu Bích Chăm của anh!</p>
-    </div>
+<canvas id="hearts"></canvas>
+<h1 id="text">Yêu Bích Chăm nhất trên thế gian này 💞</h1>
+<audio id="music" src="music1709.mp3" autoplay></audio>
 
-    <script>
-        let particles = [];
-        let targetPoints = [];
-        let isAnimating = false;
-        let startTime;
-        let animationDuration = 8000; // 8 giây
-        let music;
+<script>
+const canvas = document.getElementById('hearts');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+});
 
-        // Kích hoạt khi người dùng bấm vào màn hình
-        document.getElementById('welcome-screen').addEventListener('click', () => {
-            document.getElementById('welcome-screen').style.display = 'none';
-            isAnimating = true;
-            startTime = millis();
-            
-            // Tải và phát nhạc (Đường dẫn: music/background_music.mp3)
-            music = new p5.SoundFile('music/background_music.mp3', () => {
-                music.loop();
-            });
-        });
+let hearts = [];
+const num = 1200;
+for (let i = 0; i < num; i++) {
+  hearts.push({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    size: Math.random() * 2 + 1,
+    speedY: Math.random() * 1 + 0.5,
+    alpha: Math.random(),
+    phase: Math.random() * Math.PI * 2
+  });
+}
 
-        function setup() {
-            createCanvas(windowWidth, windowHeight);
-            noStroke();
-            
-            const numParticles = 3000; 
-            for (let i = 0; i < numParticles; i++) {
-                particles.push(new Particle());
-            }
+function drawHeart(x, y, size, color) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(size, size);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(-2, -2, -2, -6, 0, -8);
+  ctx.bezierCurveTo(2, -6, 2, -2, 0, 0);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+}
 
-            targetPoints = createHeartShapePoints(numParticles);
-        }
+let time = 0;
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  time += 0.01;
 
-        function draw() {
-            background(0);
+  hearts.forEach(h => {
+    h.y += h.speedY;
+    if (h.y > H) {
+      h.y = -10;
+      h.x = Math.random() * W;
+    }
 
-            if (isAnimating) {
-                let elapsedTime = millis() - startTime;
-                let progress = min(1, elapsedTime / animationDuration); 
+    // tạo chuyển động tập trung lại thành hình trái tim lớn
+    const t = time * 0.5;
+    const heartX = 16 * Math.pow(Math.sin(t), 3);
+    const heartY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
 
-                for (let i = 0; i < particles.length; i++) {
-                    particles[i].update(progress, targetPoints[i]); 
-                    particles[i].display();
-                }
+    const centerX = W / 2;
+    const centerY = H / 2;
 
-                drawFloatingText();
-            }
-        }
+    const targetX = centerX + heartX * 20;
+    const targetY = centerY + heartY * 20;
 
-        // Hàm tạo tọa độ điểm để tạo ra hình trái tim
-        function createHeartShapePoints(count) {
-            let points = [];
-            let scale = height / 4; 
-            let center_x = width / 2;
-            let center_y = height / 2;
+    if (time > 5 && time < 12) {
+      h.x += (targetX - h.x) * 0.01;
+      h.y += (targetY - h.y) * 0.01;
+    }
 
-            for (let i = 0; i < count; i++) {
-                let t = map(i, 0, count, 0, TWO_PI); 
-                let x = 16 * sin(t) * sin(t) * sin(t);
-                let y = 13 * cos(t) - 5 * cos(2 * t) - 2 * cos(3 * t) - cos(4 * t);
-                
-                points.push(createVector(x * scale / 18 + center_x, -y * scale / 18 + center_y)); 
-            }
-            return points;
-        }
+    const color = `rgba(255, ${100+Math.random()*155}, ${150+Math.random()*105}, ${h.alpha})`;
+    drawHeart(h.x, h.y, h.size, color);
+  });
 
-        // Lớp (Class) cho mỗi trái tim nhỏ (Particle)
-        class Particle {
-            constructor() {
-                this.pos = createVector(random(width), random(height)); 
-                this.startPos = this.pos.copy(); 
-                this.size = random(1, 3);
-                this.sparkle = random(1); 
-            }
+  // sau 12s hiện chữ
+  if (time > 12) {
+    document.getElementById('text').style.opacity = 1;
+  }
 
-            update(progress, target) {
-                this.pos.x = lerp(this.startPos.x, target.x, progress);
-                this.pos.y = lerp(this.startPos.y, target.y, progress);
-            }
+  requestAnimationFrame(animate);
+}
 
-            display() {
-                // Màu hồng nhẹ (#FFC0CB)
-                let r = 255;
-                let g = 192;
-                let b = 203;
+animate();
 
-                // Hiệu ứng lấp lánh cho trái tim
-                let alpha = map(sin(frameCount * 0.1 + this.sparkle * 10), -1, 1, 150, 255); 
-                let sizeChange = map(cos(frameCount * 0.05 + this.sparkle * 5), -1, 1, 0.5, 1.5);
-                
-                fill(r, g, b, alpha);
-                ellipse(this.pos.x, this.pos.y, this.size * sizeChange, this.size * sizeChange);
-            }
-        }
-
-        // Hàm vẽ các dòng chữ bay vòng tròn
-        function drawFloatingText() {
-            const textLines = [
-                "Gửi em món quà nhỏ bé iu Bích Chăm của anh", 
-                "Anh yêu em nhiều lắm",
-                "Chúc em Trung thu vui vẻ ❤️",
-                "Người tuyệt vời nhất đã đến với anh", 
-                "Cảm ơn vì đã yêu anh nhiều",
-            ];
-
-            push(); 
-            translate(width / 2, height / 2); 
-
-            let radius = height / 3; 
-            let time = frameCount * 0.005; 
-
-            for (let i = 0; i < textLines.length; i++) {
-                let angle = time + i * (TWO_PI / textLines.length); 
-                let x = radius * cos(angle);
-                let y = radius * sin(angle) - height/10; 
-
-                // Hiệu ứng lấp lánh cho chữ màu trắng
-                let alpha = map(sin(frameCount * 0.1 + i * 2), -1, 1, 180, 255); 
-                fill(255, 255, 255, alpha); 
-                textSize(20);
-                textAlign(CENTER, CENTER);
-
-                push(); 
-                translate(x, y);
-                rotate(angle + HALF_PI); 
-                text(textLines[i], 0, 0);
-                pop();
-            }
-            pop(); 
-        }
-    </script>
+// Tự động bật nhạc
+const music = document.getElementById('music');
+music.volume = 0.5;
+music.play().catch(() => {
+  // Một số trình duyệt cần click để phát, có thể thêm hướng dẫn nếu muốn
+});
+</script>
 </body>
 </html>
