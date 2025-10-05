@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quà Tặng Đặc Biệt Cho Bích Chăm</title>
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            text-align: center;
+        }
+
+        #canvasContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Lời nhắn xoay tròn */
+        #textRing {
+            position: absolute;
+            bottom: 10vh; /* Đặt phía dưới trái tim */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80vw;
+            height: 20vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            animation: fadeIn 3s ease-in-out forwards;
+            pointer-events: none; /* Không cản trở canvas */
+        }
+
+        .text-line {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 1.1em;
+            color: #ffb6c1; /* Hồng nhạt */
+            text-shadow: 0 0 5px #ff69b4;
+            opacity: 0.8;
+            animation: rotateText 20s linear infinite; /* Hiệu ứng xoay */
+            cursor: pointer;
+        }
+
+        /* Đặt các dòng chữ ở các vị trí khác nhau để tạo cảm giác xoay vòng */
+        .line-1 { animation-duration: 25s; }
+        .line-2 { animation-duration: 20s; animation-delay: -5s; transform: rotate(10deg); }
+        .line-3 { animation-duration: 22s; animation-delay: -10s; transform: rotate(-10deg); }
+        .line-4 { animation-duration: 27s; animation-delay: -15s; transform: rotate(20deg); }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes rotateText {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        /* Nút kích hoạt */
+        #startPrompt {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            background: #ff69b4;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 0 20px #ff69b4;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px #ff69b4; }
+            50% { box-shadow: 0 0 25px #ff69b4; }
+            100% { box-shadow: 0 0 10px #ff69b4; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvasContainer">
+        <canvas id="heartCanvas"></canvas>
+    </div>
+
+    <audio id="myAudio" loop>
+        <source src="music1709.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div id="textRing">
+        <p class="text-line line-1">Anh iu em nhiều lắm Bích Chăm ❤️</p>
+        <p class="text-line line-2">Chúc mọi điều tốt đẹp diễn ra với em 🎉</p>
+        <p class="text-line line-3">Chúc em một đời an nhiên và luôn yêu anh như bây giờ ✨</p>
+        <p class="text-line line-4">Em là người tuyệt vời nhất của anh!</p>
+    </div>
+
+    <div id="startPrompt">
+        Chạm vào đây để bắt đầu món quà! ❤️
+    </div>
+
+    <script>
+        // --- HÀM XỬ LÝ CANVAS VÀ HẠT (PARTICLES) ---
+
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        const particles = [];
+        let running = false;
+        let animationFrameId;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Công thức vẽ trái tim (Cardioid)
+        function pointOnHeart(angle) {
+            const scale = Math.min(canvas.width, canvas.height) / 450;
+            const x = 16 * Math.pow(Math.sin(angle), 3) * scale;
+            const y = (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle)) * scale;
+            return {
+                x: canvas.width / 2 + x,
+                y: canvas.height / 2 - y - 100 * scale // Dịch lên trên một chút để chừa chỗ cho chữ
+            };
+        }
+
+        class Particle {
+            constructor() {
+                // Bắt đầu từ tâm
+                this.x = canvas.width / 2;
+                this.y = canvas.height / 2;
+                this.size = Math.random() * 2 + 1;
+                this.color = `hsl(${Math.random() * 30 + 330}, 100%, 70%)`;
+                this.target = pointOnHeart(Math.random() * Math.PI * 2);
+                this.vx = (Math.random() - 0.5) * 5;
+                this.vy = (Math.random() - 0.5) * 5;
+                this.speed = 0.03;
+                this.alpha = 0;
+            }
+
+            update() {
+                if (this.alpha < 1) this.alpha += 0.02;
+                
+                // Di chuyển dần đến điểm mục tiêu (trên hình trái tim)
+                const dx = this.target.x - this.x;
+                const dy = this.target.y - this.y;
+                
+                // Hiệu ứng "sáng rực" ban đầu
+                if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+                     this.x += this.vx;
+                     this.y += this.vy;
+                } else {
+                    // Sau đó bắt đầu di chuyển chậm lại về hình trái tim
+                    this.vx = dx * this.speed;
+                    this.vy = dy * this.speed;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Tạo 500 hạt ban đầu
+        for (let i = 0; i < 500; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            if (!running) return;
+
+            // Xóa canvas với độ mờ thấp để tạo hiệu ứng "vệt sáng" pháo hoa
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'lighter'; 
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+
+        // --- HÀM XỬ LÝ TƯƠNG TÁC VÀ NHẠC ---
+        
+        const audio = document.getElementById('myAudio');
+        const startPrompt = document.getElementById('startPrompt');
+
+        function startEffect() {
+            if (running) return;
+            running = true;
+
+            // Bắt đầu phát nhạc 
+            audio.play().catch(error => {
+                console.log("Tự động phát nhạc bị chặn:", error);
+            });
+
+            // Bắt đầu hiệu ứng Canvas
+            animate();
+
+            // Ẩn nút kích hoạt
+            startPrompt.style.display = 'none';
+        }
+
+        // Kích hoạt khi người dùng chạm/click lần đầu
+        startPrompt.addEventListener('click', startEffect, { once: true });
+        startPrompt.addEventListener('touchstart', startEffect, { once: true });
+
+    </script>
+</body>
+</html>
