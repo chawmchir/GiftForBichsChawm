@@ -1,192 +1,39 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-<title>Hiệu ứng trái tim</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trái tim Bích Chăm 💖</title>
 <style>
-  :root{
-    --bg: #000;
-  }
-  html,body{
-    height:100%;
+  html,body {
     margin:0;
-    background:var(--bg);
+    padding:0;
+    background:#000;
     overflow:hidden;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    -webkit-tap-highlight-color: transparent;
+    height:100vh;
   }
-  canvas{ display:block; position:fixed; inset:0; width:100%; height:100%; }
-  /* thông báo nhỏ nếu trình duyệt chặn nhạc */
-  .hint {
-    position:fixed;
-    left:50%;
-    bottom:18px;
-    transform:translateX(-50%);
-    color:#ffdff1;
-    background:rgba(0,0,0,0.35);
-    padding:8px 12px;
-    border-radius:20px;
-    font-size:13px;
-    pointer-events:none;
-    opacity:0.0;
-    transition:opacity .4s;
+  canvas {
+    display:block;
+    width:100%;
+    height:100%;
   }
-  .hint.show{ opacity:1; }
 </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
-
-<!-- Bật nhạc: đặt music1709.mp3 cùng thư mục -->
-<audio id="bgm" src="music1709.mp3" loop></audio>
-
-<div id="hint" class="hint">Chạm màn hình để bật nhạc nếu bị chặn</div>
+<canvas id="c"></canvas>
+<audio id="music" src="music1709.mp3" autoplay loop></audio>
 
 <script>
-/* ======================
-   Cấu hình (chỉnh nếu cần)
-   ====================== */
-const CONFIG = {
-  baseParticles: 1100,      // cơ sở số particles (tự scale theo màn hình)
-  assembleDelay: 1.8,       // giây trước khi bắt đầu gom
-  assembleDuration: 6.5,    // giây để gom phần lớn về hình trái tim
-  totalDuration: 18,        // tổng thời gian (giây) -> sẽ fade out khi xong
-  pulseFreq: 2.6,           // tần số nhịp tim lớn
-  sparkleCount: 80,         // số sparkles trên trái tim lớn
-  deviceMaxParticles: 2200  // giới hạn cực đại
-};
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W = window.innerWidth;
+let H = window.innerHeight;
+canvas.width = W;
+canvas.height = H;
 
-/* ======================
-   Setup canvas (HiDPI)
-   ====================== */
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d', { alpha: true });
+window.addEventListener('resize', () => {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+});
 
-let W = innerWidth, H = innerHeight;
-let DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1)); // giới hạn DPR để tránh quá nặng
-function resize() {
-  W = innerWidth; H = innerHeight;
-  DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
-  canvas.width = Math.round(W * DPR);
-  canvas.height = Math.round(H * DPR);
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  // điều chỉnh particle count theo diện tích màn hình
-  const area = W * H;
-  const factor = Math.max(0.5, Math.min(1.6, area / (375 * 667)));
-  targetCount = Math.max(300, Math.min(CONFIG.deviceMaxParticles, Math.round(CONFIG.baseParticles * factor)));
-}
-addEventListener('resize', resize);
-resize();
-
-/* ======================
-   Hàm parametric trái tim (t in [0,2π]) -> center at (0,0)
-   ====================== */
-function heartAt(t){
-  const x = 16 * Math.pow(Math.sin(t), 3);
-  const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-  return {x, y};
-}
-
-/* ======================
-   Particle class (trái tim nhỏ)
-   ====================== */
-class Particle {
-  constructor(i){
-    this.i = i;
-    this.reset(true);
-  }
-  reset(initial=false){
-    // rải khắp màn lúc start, có thể từ dưới lên để giống video nhiều trái tim bay lên
-    this.x = Math.random() * W;
-    // nhiều xuất phát từ dưới màn hình hoặc rải trên toàn màn
-    this.y = initial ? H + Math.random()*H*0.6 : H + 20 + Math.random()*80;
-    this.r = 0.9 + Math.random()*2.2;
-    this.alpha = 0.6 + Math.random()*0.4;
-    this.vx = (Math.random()-0.5) * 0.6;
-    this.vy = -(0.6 + Math.random()*1.6);
-    this.seed = Math.random();
-    this.phase = Math.random()*Math.PI*2;
-    this.target = null;
-    this.locked = false;
-  }
-
-  assignTarget(bigHeart, tParam){
-    const jitter = 0.85 + Math.random()*0.3;
-    const p = heartAt(tParam);
-    this.target = {
-      x: bigHeart.cx + p.x * bigHeart.scale * jitter,
-      y: bigHeart.cy + p.y * bigHeart.scale * jitter
-    };
-  }
-
-  update(dt, elapsed, assembleProgress, bigHeart){
-    // free float or attracted to target
-    if (assembleProgress <= 0){
-      // nhẹ nhàng drift lên, có sóng
-      this.x += this.vx * (0.8 + Math.sin(this.phase + elapsed*0.7)*0.2);
-      this.y += this.vy * (0.9 + Math.cos(this.seed*5 + elapsed*0.3)*0.15);
-      this.phase += dt * (0.9 + this.seed*1.2);
-    } else {
-      if (!this.target){
-        // generate random tParam based on seed and index for even distribution
-        const tParam = (this.seed + this.i / targetCount) * Math.PI * 2 % (Math.PI*2);
-        this.assignTarget(bigHeart, tParam);
-      }
-      // interpolate toward target with easing depending on assembleProgress
-      const ease = 0.02 + 0.06 * Math.pow(assembleProgress, 1.2);
-      this.x += (this.target.x - this.x) * ease;
-      this.y += (this.target.y - this.y) * ease;
-
-      const dx = this.target.x - this.x;
-      const dy = this.target.y - this.y;
-      if (!this.locked && (dx*dx + dy*dy) < 3*3){
-        this.locked = true;
-        this.lockPhase = Math.random()*Math.PI*2;
-      }
-      if (this.locked){
-        // small oscillation to look alive
-        const pulse = Math.sin(elapsed * CONFIG.pulseFreq + this.lockPhase) * 0.6;
-        this.x += pulse * 0.12;
-        this.y += pulse * 0.08;
-      }
-    }
-
-    // recycle if too far top-left-right
-    if (this.y < -80 || this.x < -120 || this.x > W + 120){
-      this.reset(false);
-    }
-  }
-
-  draw(ctx, elapsed){
-    // colors pink gradient
-    const c1 = `rgba(255,110,185,${this.alpha})`;
-    const c2 = `rgba(255,40,130,${Math.max(0.18, this.alpha*0.6)})`;
-
-    // glow radial
-    const rad = this.r * 5;
-    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, rad);
-    g.addColorStop(0, c1);
-    g.addColorStop(0.5, c2);
-    g.addColorStop(1, `rgba(255,20,100,0.04)`);
-
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.fillStyle = g;
-
-    // draw small heart by bezier; scaled by r
-    const s = this.r;
-    ctx.beginPath();
-    ctx.moveTo(this.x, this.y);
-    ctx.bezierCurveTo(this.x - s*1.2, this.y - s*1.0, this.x - s*1.8, this.y - s*3.2, this.x, this.y - s*3.6);
-    ctx.bezierCurveTo(this.x + s*1.8, this.y - s*3.2, this.x + s*1.2, this.y - s*1.0, this.x, this.y);
-    ctx.fill();
-    ctx.restore();
-  }
-}
-
-/* ======================
-   Spa
+function heartShape(t)
