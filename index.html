@@ -3,170 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lời Tỏ Tình Đặc Biệt Dành cho Bích Chăm ❤️</title>
+    <title>Gửi Bích Chăm ❤️</title>
     <style>
-        /* ================================== */
-        /* Cài đặt cơ bản & Animation Keyframes */
-        /* ================================== */
+        /* Thiết lập nền tối và Canvas */
         body {
             background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Canvas để vẽ các trái tim nhỏ bay */
+        #heartCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1; /* Nằm dưới chữ và trái tim lớn */
+        }
+
+        /* Vùng chứa nội dung chính (Trái tim lớn và Chữ) */
+        #content-area {
+            position: absolute;
+            z-index: 2; /* Nằm trên Canvas */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            opacity: 0; /* Ẩn ban đầu */
         }
 
-        /* Keyframes cho hiệu ứng Lấp Lánh (Dùng cho cả Trái Tim và Chữ) */
+        /* Keyframes cho hiệu ứng Lấp Lánh (Áp dụng cho Chữ và Trái Tim) */
         @keyframes sparkle {
             0%, 100% { 
-                text-shadow: 0 0 7px #fff, 0 0 14px #ffc107, 0 0 21px #ff9800; 
+                text-shadow: 0 0 7px #fff, 0 0 14px #ff80ab, 0 0 21px #ff4081; 
                 filter: brightness(1.2);
             }
             50% { 
-                text-shadow: 0 0 12px #fff, 0 0 24px #ff8a65, 0 0 36px #ff5722; 
+                text-shadow: 0 0 12px #fff, 0 0 24px #ffc107, 0 0 36px #ff9800; 
                 filter: brightness(1.5);
             }
         }
         
-        /* Keyframes cho Trái Tim Lớn xuất hiện */
-        @keyframes heartGrow {
-            0% { opacity: 0; transform: scale(0.1); }
-            50% { opacity: 1; transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        /* Keyframes cho Chữ xuất hiện */
-        @keyframes textSlideIn {
-            0% { opacity: 0; transform: translateY(50px) scale(0.8); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        
-        /* Keyframes cho trái tim nhỏ bay (Giả lập) */
-        @keyframes particleFly {
-            0% { opacity: 1; transform: translate(var(--x1), var(--y1)) scale(0.5); }
-            50% { opacity: 0.8; }
-            100% { opacity: 0; transform: translate(var(--x2), var(--y2)) scale(0); }
-        }
-
-        /* ================================== */
-        /* Style cho Trái Tim Lớn */
-        /* ================================== */
+        /* Trái Tim Lớn */
         #big-heart {
-            font-size: 10em; /* Kích thước lớn trên màn hình điện thoại */
-            color: #ff4081; /* Màu hồng ruby */
-            position: relative;
+            font-size: 10em;
+            color: #ff4081; 
             opacity: 0;
-            /* 1. Trái tim xuất hiện: Chạy trong 2s, bắt đầu ngay lập tức */
-            animation: heartGrow 2s forwards 0s;
-            /* 2. Hiệu ứng Lấp Lánh: Bắt đầu ngay sau khi xuất hiện */
-            animation-name: heartGrow, sparkle;
-            animation-duration: 2s, 1s;
-            animation-delay: 0s, 2s; /* Bắt đầu lấp lánh sau 2 giây */
-            animation-timing-function: ease-out, linear;
-            animation-fill-mode: forwards, both;
-            animation-iteration-count: 1, infinite; /* Lấp lánh lặp lại */
+            transition: opacity 2s ease-out; /* Để JS kiểm soát việc hiển thị */
+            animation: sparkle 1s infinite alternate 4s; /* Bắt đầu lấp lánh ở giây thứ 4 */
+            text-shadow: 0 0 15px rgba(255, 64, 129, 0.8);
         }
-        
-        /* ================================== */
-        /* Style cho Dòng Chữ */
-        /* ================================== */
+
+        /* Dòng Chữ Yêu Bích Chăm */
         #love-message {
             margin-top: 30px;
             font-size: 1.8em;
             font-weight: bold;
-            color: #e0f7fa; /* Màu xanh nhạt */
+            color: #e0f7fa; 
             text-align: center;
             opacity: 0;
-            
-            /* 1. Chữ xuất hiện: Chạy trong 1.5s, bắt đầu sau 3 giây (sau khi trái tim đã lấp lánh 1s) */
-            animation: textSlideIn 1.5s forwards 3s;
-            /* 2. Hiệu ứng Lấp Lánh Chữ: Bắt đầu sau khi chữ xuất hiện (delay 4.5s) */
-            animation-name: textSlideIn, sparkle;
-            animation-duration: 1.5s, 1s;
-            animation-delay: 3s, 4.5s; 
-            animation-timing-function: ease-out, linear;
-            animation-fill-mode: forwards, both;
-            animation-iteration-count: 1, infinite;
-            
-            /* Điều chỉnh bóng lấp lánh cho chữ nổi bật hơn */
-            --glow-color: #e0f7fa;
-            text-shadow: 
-                0 0 5px var(--glow-color), 
-                0 0 10px var(--glow-color);
+            transition: opacity 1.5s ease-in;
+            animation: sparkle 1s infinite alternate 7s; /* Bắt đầu lấp lánh ở giây thứ 7 */
         }
-
-        /* ================================== */
-        /* Style cho Trái Tim Nhỏ (Particles) */
-        /* ================================== */
-        .heart-particle {
-            position: absolute;
-            font-size: 1.2em;
-            color: #ff80ab; 
-            opacity: 0;
-            animation: particleFly 3s ease-in forwards;
-        }
-
     </style>
 </head>
 <body>
-    <div id="big-heart">❤️</div>
+    <canvas id="heartCanvas"></canvas>
 
-    <h1 id="love-message">YÊU BÍCH CHĂM NHẤT TRÊN THẾ GIAN NÀY! ✨</h1>
+    <div id="content-area">
+        <div id="big-heart">❤️</div>
+        <h1 id="love-message">YÊU BÍCH CHĂM NHẤT TRÊN THẾ GIAN NÀY! ✨</h1>
+    </div>
 
     <script>
-        const totalDuration = 18000; // Tổng thời gian chạy: 18 giây
-        const numParticles = 150; // Số lượng trái tim nhỏ (Tăng lên 150 để có vẻ 'nhiều')
-        const screenWidth = window.innerWidth;
-        const screenHeight = window.innerHeight;
+        // Thời gian chạy (tính bằng milliseconds)
+        const TOTAL_DURATION = 18000; // 18 giây
         
-        // Tạo các trái tim nhỏ bay
-        function createHeartParticles() {
-            for (let i = 0; i < numParticles; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('heart-particle');
-                particle.innerHTML = '💖'; // Biểu tượng trái tim nhỏ
+        // Các mốc thời gian (Tính từ lúc code chạy)
+        const HEART_FLY_END_TIME = 4000; // Trái tim nhỏ bay xong ở 4 giây
+        const BIG_HEART_APPEAR_TIME = 4500; // Trái tim lớn xuất hiện ở 4.5 giây
+        const MESSAGE_APPEAR_TIME = 7000; // Dòng chữ xuất hiện ở 7 giây
+        const FADE_OUT_TIME = TOTAL_DURATION - 2000; // Bắt đầu mờ dần ở 16 giây
+
+        // ==================================
+        // 1. Logic Canvas (Trái tim nhỏ bay)
+        // ==================================
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let particles = [];
+        const NUM_PARTICLES = 250; // Số lượng trái tim nhỏ
+        const TARGET_X = window.innerWidth / 2;
+        const TARGET_Y = window.innerHeight / 2;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Hàm vẽ trái tim bằng Canvas (Dùng công thức hình học đơn giản)
+        function drawHeart(x, y, size, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y + size / 3);
+            ctx.bezierCurveTo(x + size * 0.5, y - size * 0.5, x + size * 1.5, y + size * 0.2, x, y + size);
+            ctx.moveTo(x, y + size / 3);
+            ctx.bezierCurveTo(x - size * 0.5, y - size * 0.5, x - size * 1.5, y + size * 0.2, x, y + size);
+            ctx.fill();
+        }
+
+        class HeartParticle {
+            constructor() {
+                // Bắt đầu ngẫu nhiên từ bất kỳ đâu trên màn hình
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 8 + 3; // Kích thước 3-11px
+                this.color = `hsl(330, 80%, ${Math.random() * 20 + 70}%)`; // Màu hồng ngẫu nhiên
+                this.opacity = 1;
+                this.speed = Math.random() * 0.005 + 0.002; // Tốc độ di chuyển
+                this.life = HEART_FLY_END_TIME * Math.random();
+            }
+
+            update(deltaTime) {
+                if (this.life > HEART_FLY_END_TIME) {
+                    this.opacity = 0; // Biến mất sau khi hết thời gian bay
+                    return;
+                }
+
+                this.life += deltaTime;
+                const progress = this.life / HEART_FLY_END_TIME;
+
+                // Tính toán đường bay: Di chuyển từ vị trí hiện tại về trung tâm (TARGET_X, TARGET_Y)
+                this.x += (TARGET_X - this.x) * this.speed;
+                this.y += (TARGET_Y - this.y) * this.speed;
                 
-                // Vị trí bắt đầu ngẫu nhiên trên toàn màn hình
-                const startX = Math.random() * screenWidth;
-                const startY = Math.random() * screenHeight;
-
-                // Giả lập đường bay hướng vào trung tâm (vị trí trái tim lớn)
-                const endX = screenWidth / 2 + (Math.random() - 0.5) * 200; 
-                const endY = screenHeight / 2 + (Math.random() - 0.5) * 200; 
-
-                particle.style.left = `${startX}px`;
-                particle.style.top = `${startY}px`;
+                // Thu nhỏ dần khi tiến gần trung tâm
+                this.size *= 1 - (progress * 0.005); 
                 
-                // Thiết lập biến CSS cho animation
-                particle.style.setProperty('--x1', `0px`);
-                particle.style.setProperty('--y1', `0px`);
-                particle.style.setProperty('--x2', `${endX - startX}px`);
-                particle.style.setProperty('--y2', `${endY - startY}px`);
+                // Mờ dần
+                this.opacity = 1 - progress;
+            }
 
-                // Độ trễ ngẫu nhiên: Các trái tim bay trong 0 đến 4 giây đầu tiên
-                particle.style.animationDelay = `${Math.random() * 4}s`; 
-
-                document.body.appendChild(particle);
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                drawHeart(this.x, this.y, this.size, this.color);
+                ctx.globalAlpha = 1;
             }
         }
-        
-        // 1. Chạy hiệu ứng trái tim nhỏ
-        createHeartParticles();
 
-        // 2. Thiết lập tổng thời gian chạy (18 giây)
+        function initParticles() {
+            for (let i = 0; i < NUM_PARTICLES; i++) {
+                particles.push(new HeartParticle());
+            }
+        }
+
+        let lastTime = 0;
+        let animationFrameId;
+
+        function animate(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
+            // Xóa Canvas mỗi khung hình
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Cập nhật và vẽ các trái tim nhỏ
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update(deltaTime);
+                particles[i].draw();
+            }
+
+            // Loại bỏ các trái tim đã biến mất
+            particles = particles.filter(p => p.opacity > 0);
+            
+            // Nếu vẫn còn thời gian, tiếp tục animation
+            if (currentTime < TOTAL_DURATION) {
+                animationFrameId = requestAnimationFrame(animate);
+            } else {
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+
+        // ==================================
+        // 2. Quản lý Hiển thị Nội dung (Thời gian)
+        // ==================================
+        
+        // Bắt đầu hiệu ứng trái tim lớn và chữ
         setTimeout(() => {
-            // Sau 18 giây, làm mờ dần toàn bộ màn hình hoặc hiển thị thông báo kết thúc
+            document.getElementById('content-area').style.opacity = '1';
+        }, 100); // Cho hiện khu vực nội dung (ẩn bên trong)
+
+        // Hiển thị Trái Tim Lớn
+        setTimeout(() => {
+            document.getElementById('big-heart').style.opacity = '1';
+        }, BIG_HEART_APPEAR_TIME); // 4.5 giây
+
+        // Hiển thị Dòng Chữ
+        setTimeout(() => {
+            document.getElementById('love-message').style.opacity = '1';
+        }, MESSAGE_APPEAR_TIME); // 7 giây
+
+        // Kết thúc và Mờ dần
+        setTimeout(() => {
             document.body.style.transition = 'opacity 2s ease-out';
             document.body.style.opacity = '0';
-            setTimeout(() => {
-                document.body.innerHTML = '<h1 style="color: #fff; font-size: 1.5em;">Mãi mãi chỉ yêu Bích Chăm ❤️</h1>';
-                document.body.style.opacity = '1';
-            }, 2000);
-        }, totalDuration);
+        }, FADE_OUT_TIME); // 16 giây
+
+        // Khởi chạy
+        initParticles();
+        animate(0);
 
     </script>
 </body>
