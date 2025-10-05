@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gửi Bích Chăm ❤️</title>
     <style>
-        /* Thiết lập nền tối và Canvas */
+        /* [Phần CSS giữ nguyên như phiên bản trước] */
         body {
             background-color: #000;
             margin: 0;
@@ -18,26 +18,23 @@
             position: relative;
         }
 
-        /* Canvas để vẽ các trái tim nhỏ bay */
         #heartCanvas {
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 1; /* Nằm dưới chữ và trái tim lớn */
+            z-index: 1;
         }
 
-        /* Vùng chứa nội dung chính (Trái tim lớn và Chữ) */
         #content-area {
             position: absolute;
-            z-index: 2; /* Nằm trên Canvas */
+            z-index: 2;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            opacity: 0; /* Ẩn ban đầu */
+            opacity: 0;
         }
 
-        /* Keyframes cho hiệu ứng Lấp Lánh (Áp dụng cho Chữ và Trái Tim) */
         @keyframes sparkle {
             0%, 100% { 
                 text-shadow: 0 0 7px #fff, 0 0 14px #ff80ab, 0 0 21px #ff4081; 
@@ -49,17 +46,15 @@
             }
         }
         
-        /* Trái Tim Lớn */
         #big-heart {
             font-size: 10em;
             color: #ff4081; 
             opacity: 0;
-            transition: opacity 2s ease-out; /* Để JS kiểm soát việc hiển thị */
-            animation: sparkle 1s infinite alternate 4s; /* Bắt đầu lấp lánh ở giây thứ 4 */
+            transition: opacity 2s ease-out;
+            animation: sparkle 1s infinite alternate 4s;
             text-shadow: 0 0 15px rgba(255, 64, 129, 0.8);
         }
 
-        /* Dòng Chữ Yêu Bích Chăm */
         #love-message {
             margin-top: 30px;
             font-size: 1.8em;
@@ -68,7 +63,25 @@
             text-align: center;
             opacity: 0;
             transition: opacity 1.5s ease-in;
-            animation: sparkle 1s infinite alternate 7s; /* Bắt đầu lấp lánh ở giây thứ 7 */
+            animation: sparkle 1s infinite alternate 7s;
+        }
+
+        /* Nút điều khiển nhạc */
+        #music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            padding: 10px 15px;
+            background-color: #ff4081;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            font-size: 1em;
+            display: none; 
+            transition: opacity 0.5s;
         }
     </style>
 </head>
@@ -79,32 +92,74 @@
         <div id="big-heart">❤️</div>
         <h1 id="love-message">YÊU BÍCH CHĂM NHẤT TRÊN THẾ GIAN NÀY! ✨</h1>
     </div>
+    
+    <audio id="backgroundMusic" loop>
+        <source src="music1709.mp3" type="audio/mpeg">
+        Trình duyệt của bạn không hỗ trợ thẻ audio.
+    </audio>
+
+    <button id="music-control">▶️ Phát Nhạc</button>
 
     <script>
         // Thời gian chạy (tính bằng milliseconds)
-        const TOTAL_DURATION = 18000; // 18 giây
+        const TOTAL_DURATION = 18000; 
         
         // Các mốc thời gian (Tính từ lúc code chạy)
-        const HEART_FLY_END_TIME = 4000; // Trái tim nhỏ bay xong ở 4 giây
-        const BIG_HEART_APPEAR_TIME = 4500; // Trái tim lớn xuất hiện ở 4.5 giây
-        const MESSAGE_APPEAR_TIME = 7000; // Dòng chữ xuất hiện ở 7 giây
-        const FADE_OUT_TIME = TOTAL_DURATION - 2000; // Bắt đầu mờ dần ở 16 giây
+        const HEART_FLY_END_TIME = 4000;
+        const BIG_HEART_APPEAR_TIME = 4500;
+        const MESSAGE_APPEAR_TIME = 7000;
+        const FADE_OUT_TIME = TOTAL_DURATION - 2000;
 
-        // ==================================
-        // 1. Logic Canvas (Trái tim nhỏ bay)
-        // ==================================
         const canvas = document.getElementById('heartCanvas');
         const ctx = canvas.getContext('2d');
-
+        const music = document.getElementById('backgroundMusic');
+        const musicControl = document.getElementById('music-control');
+        
         let particles = [];
-        const NUM_PARTICLES = 250; // Số lượng trái tim nhỏ
+        const NUM_PARTICLES = 250;
         const TARGET_X = window.innerWidth / 2;
         const TARGET_Y = window.innerHeight / 2;
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
+        let musicPlayed = false;
 
-        // Hàm vẽ trái tim bằng Canvas (Dùng công thức hình học đơn giản)
+        // ==================================
+        // LOGIC CHẠY NHẠC (Quan trọng cho điện thoại)
+        // ==================================
+
+        // Hiển thị nút điều khiển nhạc ngay lập tức
+        musicControl.style.display = 'block';
+
+        musicControl.addEventListener('click', () => {
+            if (!musicPlayed) {
+                // Lần click đầu tiên: Bắt đầu phát nhạc
+                music.play().then(() => {
+                    musicPlayed = true;
+                    musicControl.textContent = '⏸️ Tạm Dừng';
+                    // Ẩn nút sau khi nhạc bắt đầu phát
+                    setTimeout(() => {
+                        musicControl.style.opacity = '0';
+                    }, 1000); 
+                }).catch(error => {
+                    console.error("Lỗi phát nhạc, có thể do trình duyệt:", error);
+                    alert("Cần tương tác lần nữa để phát nhạc.");
+                });
+            } else if (music.paused) {
+                music.play();
+                musicControl.textContent = '⏸️ Tạm Dừng';
+                musicControl.style.opacity = '1';
+            } else {
+                music.pause();
+                musicControl.textContent = '▶️ Phát Nhạc';
+                musicControl.style.opacity = '1';
+            }
+        });
+        
+        // ==================================
+        // LOGIC CANVAS (Vẽ trái tim)
+        // ==================================
         function drawHeart(x, y, size, color) {
             ctx.fillStyle = color;
             ctx.beginPath();
@@ -117,33 +172,28 @@
 
         class HeartParticle {
             constructor() {
-                // Bắt đầu ngẫu nhiên từ bất kỳ đâu trên màn hình
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 8 + 3; // Kích thước 3-11px
-                this.color = `hsl(330, 80%, ${Math.random() * 20 + 70}%)`; // Màu hồng ngẫu nhiên
+                this.size = Math.random() * 8 + 3;
+                this.color = `hsl(330, 80%, ${Math.random() * 20 + 70}%)`;
                 this.opacity = 1;
-                this.speed = Math.random() * 0.005 + 0.002; // Tốc độ di chuyển
+                this.speed = Math.random() * 0.005 + 0.002;
                 this.life = HEART_FLY_END_TIME * Math.random();
             }
 
             update(deltaTime) {
                 if (this.life > HEART_FLY_END_TIME) {
-                    this.opacity = 0; // Biến mất sau khi hết thời gian bay
+                    this.opacity = 0;
                     return;
                 }
 
                 this.life += deltaTime;
                 const progress = this.life / HEART_FLY_END_TIME;
 
-                // Tính toán đường bay: Di chuyển từ vị trí hiện tại về trung tâm (TARGET_X, TARGET_Y)
                 this.x += (TARGET_X - this.x) * this.speed;
                 this.y += (TARGET_Y - this.y) * this.speed;
                 
-                // Thu nhỏ dần khi tiến gần trung tâm
                 this.size *= 1 - (progress * 0.005); 
-                
-                // Mờ dần
                 this.opacity = 1 - progress;
             }
 
@@ -167,50 +217,43 @@
             const deltaTime = currentTime - lastTime;
             lastTime = currentTime;
 
-            // Xóa Canvas mỗi khung hình
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Cập nhật và vẽ các trái tim nhỏ
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update(deltaTime);
                 particles[i].draw();
             }
 
-            // Loại bỏ các trái tim đã biến mất
             particles = particles.filter(p => p.opacity > 0);
             
-            // Nếu vẫn còn thời gian, tiếp tục animation
             if (currentTime < TOTAL_DURATION) {
                 animationFrameId = requestAnimationFrame(animate);
             } else {
                 cancelAnimationFrame(animationFrameId);
+                music.pause(); // Dừng nhạc khi hết thời gian
             }
         }
 
         // ==================================
-        // 2. Quản lý Hiển thị Nội dung (Thời gian)
+        // LOGIC HIỂN THỊ NỘI DUNG & THỜI GIAN
         // ==================================
         
-        // Bắt đầu hiệu ứng trái tim lớn và chữ
         setTimeout(() => {
             document.getElementById('content-area').style.opacity = '1';
-        }, 100); // Cho hiện khu vực nội dung (ẩn bên trong)
+        }, 100);
 
-        // Hiển thị Trái Tim Lớn
         setTimeout(() => {
             document.getElementById('big-heart').style.opacity = '1';
-        }, BIG_HEART_APPEAR_TIME); // 4.5 giây
+        }, BIG_HEART_APPEAR_TIME);
 
-        // Hiển thị Dòng Chữ
         setTimeout(() => {
             document.getElementById('love-message').style.opacity = '1';
-        }, MESSAGE_APPEAR_TIME); // 7 giây
+        }, MESSAGE_APPEAR_TIME);
 
-        // Kết thúc và Mờ dần
         setTimeout(() => {
             document.body.style.transition = 'opacity 2s ease-out';
             document.body.style.opacity = '0';
-        }, FADE_OUT_TIME); // 16 giây
+        }, FADE_OUT_TIME);
 
         // Khởi chạy
         initParticles();
