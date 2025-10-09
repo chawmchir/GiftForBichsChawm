@@ -14,7 +14,6 @@
             margin: 0;
             background-color: #fce4ec; 
             color: #4a4a4a;
-            transition: background-color 2s ease-in-out;
         }
 
         .container {
@@ -32,6 +31,25 @@
             color: #d81b60;
             margin-bottom: 30px;
             font-size: 1.8em;
+        }
+        
+        /* Hiển thị nút để người dùng tự click, đảm bảo nhạc phát */
+        #startButton {
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #ff80ab;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #startButton:hover {
+            background-color: #f06292;
+            transform: translateY(-2px);
         }
 
         #typewriter-text {
@@ -65,6 +83,8 @@
     <div class="container">
         <h1>Gửi đến em, người anh yêu 💕</h1>
         
+        <button id="startButton">Bấm vào đây để mở lời từ anh</button>
+        
         <p id="typewriter-text"></p>
         
         <audio id="background-music" loop>
@@ -76,9 +96,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const textElement = document.getElementById('typewriter-text');
+            const startButton = document.getElementById('startButton');
             const music = document.getElementById('background-music');
 
-            // Tốc độ gõ chữ: 50ms
             const TYPING_SPEED = 50; 
             let index = 0;
             
@@ -88,29 +108,27 @@
                 if (index < fullText.length) {
                     textElement.innerHTML += fullText.charAt(index);
                     index++;
-                    // Lặp lại hàm sau TYPING_SPEED ms
                     setTimeout(typeWriter, TYPING_SPEED);
                 } else {
-                    // KẾT THÚC
                     music.pause();
                     music.currentTime = 0; 
                     textElement.classList.remove('typing'); 
                 }
             }
 
-            // --- BẮT ĐẦU TỰ ĐỘNG ---
-            
-            // 1. Cố gắng phát nhạc tự động
-            // LƯU Ý: Đây là phần có thể bị chặn bởi trình duyệt.
-            music.play().catch(e => {
-                console.warn("Trình duyệt đã chặn tính năng Autoplay. Vui lòng cấp quyền cho trang web để nhạc phát tự động.");
-            }); 
-            
-            // 2. Bắt đầu hiệu ứng đánh máy
-            textElement.classList.add('typing'); 
-            typeWriter();
-            
-            // ------------------------
+            startButton.addEventListener('click', () => {
+                if (startButton.disabled) return;
+                
+                startButton.style.display = 'none'; 
+                textElement.innerHTML = '';
+                textElement.classList.add('typing'); 
+
+                // Lỗi chặn Autoplay được giải quyết bằng tương tác này
+                music.play().catch(e => console.error("Lỗi phát nhạc:", e)); 
+                
+                index = 0;
+                typeWriter();
+            }, { once: true }); // Chỉ cho phép click một lần
         });
     </script>
 </body>
