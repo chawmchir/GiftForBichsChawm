@@ -12,7 +12,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #fce4ec; /* Hồng nhạt */
+            background-color: #fce4ec; 
             color: #4a4a4a;
             transition: background-color 2s ease-in-out;
         }
@@ -25,36 +25,18 @@
             max-width: 650px;
             width: 90%;
             text-align: center;
-            border: 3px solid #ff80ab; /* Màu hồng đậm */
+            border: 3px solid #ff80ab;
         }
 
         h1 {
-            color: #d81b60; /* Hồng sẫm */
+            color: #d81b60;
             margin-bottom: 30px;
             font-size: 1.8em;
         }
 
-        #startButton {
-            padding: 12px 25px;
-            font-size: 18px;
-            font-weight: bold;
-            background-color: #ff80ab;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        #startButton:hover {
-            background-color: #f06292;
-            transform: translateY(-2px);
-        }
-
         #typewriter-text {
             text-align: left;
-            white-space: pre-wrap; /* Quan trọng để giữ định dạng */
+            white-space: pre-wrap; 
             min-height: 50px;
             font-size: 1.15em;
             line-height: 1.6;
@@ -83,8 +65,6 @@
     <div class="container">
         <h1>Gửi đến em, người anh yêu 💕</h1>
         
-        <button id="startButton">Mở lời từ anh</button>
-        
         <p id="typewriter-text"></p>
         
         <audio id="background-music" loop>
@@ -96,14 +76,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const textElement = document.getElementById('typewriter-text');
-            const startButton = document.getElementById('startButton');
             const music = document.getElementById('background-music');
 
-            // Tốc độ gõ chữ: 50ms cho tốc độ đọc bình thường
+            // Tốc độ gõ chữ: 50ms
             const TYPING_SPEED = 50; 
             let index = 0;
-            let timeoutId; // Để lưu ID của setTimeout
-
+            
             const fullText = "Anh chờ em ngủ anh mới dám nói, anh nói xong anh biết chắc là sáng mai em chỉ trả lời một cái sticker rồi xong, nhưng mong là em sẽ đọc hết đoạn tin nhắn này của anh, xem xong em không trả lời cũng được. Nhưng mà chỉ mong em sẽ phần nào hiểu cho anh hơn, anh cũng chỉ là thằng trãi qua đau khổ đi tìm hạnh phúc thôi, tự hỏi nếu như một ngày anh thử im lặng thì trong khoảng lặng đó em có chút nào bận tâm hay suy nghĩ nhắn cho anh hay không, không phải anh bắt em phải chủ động nhắn cho anh nhưng mà chỉ cần một câu hỏi han anh thôi cũng được rồi. Anh là một đứa hay suy nghĩ nhiều chắc em cũng biết, tình yêu mà đâu phải lúc nào rãnh mới nhắn tin cho nhau đâu, hạnh phúc của anh đơn giản chỉ từ những lời quan tâm nhỏ nhặt thôi. Anh biết em cũng chỉ là chập chửng tập yêu nên anh cũng muốn nói ra để em hiểu anh hơn, yêu em không biết cất đâu cho hết nhưng anh cũng cần sự cảm thông thấu hiểu từ em như cách anh cũng đang mỗi ngày tìm hiểu, cảm thông, thấu hiểu cho em. Anh đã coi em là tất cả, là tương lai của anh nên anh không muốn vì một khoảnh khắc tồi tệ mà bỏ lỡ nhau. Nếu em đọc đến đây thì em cũng phần nào hiểu rồi, anh không muốn em bé của anh vì anh mà phải buồn vì điều gì hết, anh cũng chỉ muốn mỗi khi anh vô tình làm em buồn thì em sẽ cùng anh ngồi lại nói rõ mọi chuyện, và tất nhiên trước đó chắc chắn anh sẽ tự biết lỗi của mình. Cảm ơn đã đọc đến đây. Yêu em nhiều lắm💕";
             
             function typeWriter() {
@@ -111,34 +89,28 @@
                     textElement.innerHTML += fullText.charAt(index);
                     index++;
                     // Lặp lại hàm sau TYPING_SPEED ms
-                    timeoutId = setTimeout(typeWriter, TYPING_SPEED);
+                    setTimeout(typeWriter, TYPING_SPEED);
                 } else {
                     // KẾT THÚC
                     music.pause();
                     music.currentTime = 0; 
                     textElement.classList.remove('typing'); 
-                    startButton.textContent = "Lời đã được gửi trọn vẹn! ❤️";
-                    startButton.disabled = true;
-                    startButton.style.cssText = 'background-color: #4caf50; cursor: default;'; // Màu xanh lá khi hoàn thành
                 }
             }
 
-            startButton.addEventListener('click', () => {
-                // Bảo vệ: không chạy lại nếu đang chạy hoặc đã kết thúc
-                if (startButton.disabled) return;
-                
-                // Chuẩn bị
-                startButton.style.display = 'none'; // Ẩn nút
-                textElement.innerHTML = '';
-                textElement.classList.add('typing'); // Hiển thị con trỏ
-
-                // Bắt đầu phát nhạc (cần tương tác người dùng để vượt qua chính sách autoplay)
-                music.play().catch(e => console.error("Lỗi phát nhạc, vui lòng kiểm tra file 'music1709.mp3':", e)); 
-                
-                // Bắt đầu hiệu ứng
-                index = 0;
-                typeWriter();
-            });
+            // --- BẮT ĐẦU TỰ ĐỘNG ---
+            
+            // 1. Cố gắng phát nhạc tự động
+            // LƯU Ý: Đây là phần có thể bị chặn bởi trình duyệt.
+            music.play().catch(e => {
+                console.warn("Trình duyệt đã chặn tính năng Autoplay. Vui lòng cấp quyền cho trang web để nhạc phát tự động.");
+            }); 
+            
+            // 2. Bắt đầu hiệu ứng đánh máy
+            textElement.classList.add('typing'); 
+            typeWriter();
+            
+            // ------------------------
         });
     </script>
 </body>
