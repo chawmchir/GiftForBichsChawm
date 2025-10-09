@@ -3,185 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lời Nhắn Đặc Biệt (Nhấn để Mở)</title>
+    <title>Lời tự sự từ trái tim</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
-            background-color: #ffe0f0; 
+            background-color: #fce4ec; /* Hồng nhạt */
             color: #4a4a4a;
-            line-height: 1.8;
-            text-align: center;
-            /* Thiết lập fullscreen cho màn hình chờ */
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden; /* Ngăn cuộn */
-        }
-        
-        /* Phong cách cho màn hình chờ (trước khi click) */
-        #start-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 239, 245, 0.95); /* Nền mờ hơn */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            cursor: pointer;
-            transition: opacity 1s ease-out;
-        }
-        #start-screen h1 {
-            color: #d6338a;
-            font-size: 2.5em;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        #start-screen p {
-            color: #888;
-            font-size: 1.2em;
-            margin-top: 20px;
-            /* Hiệu ứng nhấp nháy */
-            animation: pulse-click 1.5s infinite; 
-        }
-        @keyframes pulse-click {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
+            transition: background-color 2s ease-in-out;
         }
 
-        /* Phong cách cho nội dung chính (sau khi click) */
-        #main-content {
-            opacity: 0; /* Ẩn ban đầu */
-            transition: opacity 1s ease-in;
-            width: 100%;
-        }
         .container {
-            max-width: 700px;
-            margin: auto;
-            padding: 30px;
-            background: white;
+            background-color: #ffffff;
+            padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+            border: 3px solid #ff80ab; /* Màu hồng đậm */
+        }
+
+        h1 {
+            color: #d81b60; /* Hồng sẫm */
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        #startButton {
+            padding: 12px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #ff80ab;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #startButton:hover {
+            background-color: #f06292;
+            transform: translateY(-2px);
+        }
+
+        #typewriter-text {
             text-align: left;
+            white-space: pre-wrap; /* Quan trọng để giữ định dạng */
+            min-height: 50px;
+            font-size: 1.15em;
+            line-height: 1.6;
+            margin-top: 20px;
+            border-left: 3px solid #f06292;
+            padding-left: 15px;
         }
-        h2 {
-            color: #d6338a;
-            border-bottom: 2px solid #ff99c8;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        #message-display {
-            white-space: pre-wrap;
-            min-height: 250px; 
-            font-size: 1.1em;
-            color: #333;
-        }
-        .cursor {
+
+        /* Hiệu ứng con trỏ nhấp nháy */
+        .typing::after {
+            content: '|';
+            animation: blink-caret .75s step-end infinite;
             display: inline-block;
-            width: 2px;
-            height: 1.1em;
-            background-color: #d6338a;
-            animation: blink 0.7s infinite;
-            margin-left: 2px;
+            font-weight: bold;
+            color: #d81b60;
         }
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-        audio {
-            width: 100%;
-            margin-bottom: 20px;
+
+        @keyframes blink-caret {
+            from, to { opacity: 0 }
+            50% { opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-    <div id="start-screen">
-        <h1>Bấm vào đây để bắt đầu</h1>
-        <p>💌 Nhấn vào bất cứ đâu để mở lời nhắn và bật nhạc 🎶</p>
-    </div>
-
-    <div id="main-content">
-        <div class="container">
-            <audio controls id="background-music">
-                <source src="music1709.mp3" type="audio/mpeg">
-                Trình duyệt của bạn không hỗ trợ phần tử audio.
-            </audio>
-            
-            <h2>Lời Anh Muốn Gửi Đến Em</h2>
-            <p id="message-display"></p>
-        </div>
+    <div class="container">
+        <h1>Gửi đến em, người anh yêu 💕</h1>
+        
+        <button id="startButton">Mở lời từ anh</button>
+        
+        <p id="typewriter-text"></p>
+        
+        <audio id="background-music" loop>
+            <source src="music1709.mp3" type="audio/mp3">
+            Trình duyệt của em không hỗ trợ phát nhạc.
+        </audio>
     </div>
 
     <script>
-        const message = "Anh chờ em ngủ anh mới dám nói, anh nói xong anh biết chắc là sáng mai em chỉ trả lời một cái sticker rồi xong, nhưng mong là em sẽ đọc hết đoạn tin nhắn này của anh, xem xong em không trả lời cũng được. Nhưng mà chỉ mong em sẽ phần nào hiểu cho anh hơn, anh cũng chỉ là thằng trãi qua đau khổ đi tìm hạnh phúc thôi, tự hỏi nếu như một ngày anh thử im lặng thì trong khoảng lặng đó em có chút nào bận tâm hay suy nghĩ nhắn cho anh hay không, không phải anh bắt em phải chủ động nhắn cho anh nhưng mà chỉ cần một câu hỏi han anh thôi cũng được rồi. Anh là một đứa hay suy nghĩ nhiều chắc em cũng biết, tình yêu mà đâu phải lúc nào rãnh mới nhắn tin cho nhau đâu, hạnh phúc của anh đơn giản chỉ từ những lời quan tâm nhỏ nhặt thôi. Anh biết em cũng chỉ là chập chửng tập yêu nên anh cũng muốn nói ra để em hiểu anh hơn, yêu em không biết cất đâu cho hết nhưng anh cũng cần sự cảm thông thấu hiểu từ em như cách anh cũng đang mỗi ngày tìm hiểu, cảm thông, thấu hiểu cho em. Anh đã coi em là tất cả, là tương lai của anh nên anh không muốn vì một khoảnh khắc tồi tệ mà bỏ lỡ nhau. Nếu em đọc đến đây thì em cũng phần nào hiểu rồi, anh không muốn em bé của anh vì anh mà phải buồn vì điều gì hết, anh cũng chỉ muốn mỗi khi anh vô tình làm em buồn thì em sẽ cùng anh ngồi lại nói rõ mọi chuyện, và tất nhiên trước đó chắc chắn anh sẽ tự biết lỗi của mình. Cảm ơn đã đọc đến đây. Yêu em nhiều lắm💕";
-        
-        const startScreen = document.getElementById('start-screen');
-        const mainContent = document.getElementById('main-content');
-        const displayElement = document.getElementById('message-display');
-        const audio = document.getElementById('background-music');
-        
-        const delay = 50; 
-        let index = 0;
-        let cursor = document.createElement('span');
-        cursor.classList.add('cursor');
+        document.addEventListener('DOMContentLoaded', () => {
+            const textElement = document.getElementById('typewriter-text');
+            const startButton = document.getElementById('startButton');
+            const music = document.getElementById('background-music');
 
-        // Hàm xử lý lặp lại nhạc (chỉ khi tin nhắn chưa xong)
-        const audioLoopHandler = () => {
-            if (index < message.length) { 
-                audio.currentTime = 0;
-                audio.play();
-            }
-        };
-        
-        // Hàm bắt đầu hiệu ứng đánh máy
-        function typeWriter() {
-            if (index < message.length) {
-                displayElement.insertBefore(document.createTextNode(message.charAt(index)), cursor);
-                index++;
-                setTimeout(typeWriter, delay);
-            } else {
-                // KHI DÒNG CHỮ CHẠY XONG
-                cursor.remove();
-                audio.pause(); 
-                audio.removeEventListener('ended', audioLoopHandler);
-            }
-        }
+            // Tốc độ gõ chữ: 50ms cho tốc độ đọc bình thường
+            const TYPING_SPEED = 50; 
+            let index = 0;
+            let timeoutId; // Để lưu ID của setTimeout
 
-        // HÀM CHÍNH: Kích hoạt code khi người dùng click
-        function initializeApp() {
-            // 1. Ẩn màn hình chờ và hiện nội dung chính
-            startScreen.style.opacity = '0';
-            setTimeout(() => {
-                startScreen.style.display = 'none';
-                mainContent.style.opacity = '1';
-                // Đảm bảo body có thể cuộn lại được nếu cần
-                document.body.style.height = 'auto'; 
-            }, 1000); // Chờ 1 giây để hiệu ứng mờ kết thúc
-
-            // 2. Bắt đầu lắng nghe vòng lặp nhạc
-            audio.addEventListener('ended', audioLoopHandler);
+            const fullText = "Anh chờ em ngủ anh mới dám nói, anh nói xong anh biết chắc là sáng mai em chỉ trả lời một cái sticker rồi xong, nhưng mong là em sẽ đọc hết đoạn tin nhắn này của anh, xem xong em không trả lời cũng được. Nhưng mà chỉ mong em sẽ phần nào hiểu cho anh hơn, anh cũng chỉ là thằng trãi qua đau khổ đi tìm hạnh phúc thôi, tự hỏi nếu như một ngày anh thử im lặng thì trong khoảng lặng đó em có chút nào bận tâm hay suy nghĩ nhắn cho anh hay không, không phải anh bắt em phải chủ động nhắn cho anh nhưng mà chỉ cần một câu hỏi han anh thôi cũng được rồi. Anh là một đứa hay suy nghĩ nhiều chắc em cũng biết, tình yêu mà đâu phải lúc nào rãnh mới nhắn tin cho nhau đâu, hạnh phúc của anh đơn giản chỉ từ những lời quan tâm nhỏ nhặt thôi. Anh biết em cũng chỉ là chập chửng tập yêu nên anh cũng muốn nói ra để em hiểu anh hơn, yêu em không biết cất đâu cho hết nhưng anh cũng cần sự cảm thông thấu hiểu từ em như cách anh cũng đang mỗi ngày tìm hiểu, cảm thông, thấu hiểu cho em. Anh đã coi em là tất cả, là tương lai của anh nên anh không muốn vì một khoảnh khắc tồi tệ mà bỏ lỡ nhau. Nếu em đọc đến đây thì em cũng phần nào hiểu rồi, anh không muốn em bé của anh vì anh mà phải buồn vì điều gì hết, anh cũng chỉ muốn mỗi khi anh vô tình làm em buồn thì em sẽ cùng anh ngồi lại nói rõ mọi chuyện, và tất nhiên trước đó chắc chắn anh sẽ tự biết lỗi của mình. Cảm ơn đã đọc đến đây. Yêu em nhiều lắm💕";
             
-            // 3. Bật nhạc (sẽ chạy vì có tương tác của người dùng)
-            audio.play().catch(error => {
-                console.error("Lỗi khi phát nhạc:", error);
+            function typeWriter() {
+                if (index < fullText.length) {
+                    textElement.innerHTML += fullText.charAt(index);
+                    index++;
+                    // Lặp lại hàm sau TYPING_SPEED ms
+                    timeoutId = setTimeout(typeWriter, TYPING_SPEED);
+                } else {
+                    // KẾT THÚC
+                    music.pause();
+                    music.currentTime = 0; 
+                    textElement.classList.remove('typing'); 
+                    startButton.textContent = "Lời đã được gửi trọn vẹn! ❤️";
+                    startButton.disabled = true;
+                    startButton.style.cssText = 'background-color: #4caf50; cursor: default;'; // Màu xanh lá khi hoàn thành
+                }
+            }
+
+            startButton.addEventListener('click', () => {
+                // Bảo vệ: không chạy lại nếu đang chạy hoặc đã kết thúc
+                if (startButton.disabled) return;
+                
+                // Chuẩn bị
+                startButton.style.display = 'none'; // Ẩn nút
+                textElement.innerHTML = '';
+                textElement.classList.add('typing'); // Hiển thị con trỏ
+
+                // Bắt đầu phát nhạc (cần tương tác người dùng để vượt qua chính sách autoplay)
+                music.play().catch(e => console.error("Lỗi phát nhạc, vui lòng kiểm tra file 'music1709.mp3':", e)); 
+                
+                // Bắt đầu hiệu ứng
+                index = 0;
+                typeWriter();
             });
-
-            // 4. Bắt đầu hiệu ứng đánh máy
-            displayElement.appendChild(cursor);
-            typeWriter();
-
-            // 5. Gỡ bỏ sự kiện click để code không chạy lại
-            startScreen.removeEventListener('click', initializeApp);
-        }
-
-        // Gắn sự kiện click vào màn hình chờ
-        startScreen.addEventListener('click', initializeApp);
+        });
     </script>
 </body>
 </html>
