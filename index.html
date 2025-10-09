@@ -7,7 +7,8 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 50px;
+            margin: 0;
+            padding: 50px 20px;
             background-color: #ffe0f0; /* Nền hồng nhẹ nhàng */
             color: #4a4a4a;
             line-height: 1.8;
@@ -29,12 +30,10 @@
             margin-bottom: 20px;
         }
         #message-display {
-            /* Hiển thị giống như đang đánh máy */
-            white-space: pre-wrap; 
+            white-space: pre-wrap; /* Hiển thị giống như đang đánh máy */
             min-height: 250px; 
             font-size: 1.1em;
             color: #333;
-            animation: pulse 1.5s infinite; /* Hiệu ứng nhẹ */
         }
         /* Hiệu ứng nhấp nháy cho con trỏ */
         .cursor {
@@ -48,24 +47,29 @@
         @keyframes blink {
             50% { opacity: 0; }
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.005); }
-            100% { transform: scale(1); }
-        }
         audio {
             width: 100%;
             margin-bottom: 20px;
+        }
+        /* Thông báo nhỏ nếu nhạc không tự bật */
+        #autoplay-info {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <audio controls **autoplay loop**>
+        <audio controls autoplay loop id="background-music">
             <source src="music1709.mp3" type="audio/mpeg">
             Trình duyệt của bạn không hỗ trợ phần tử audio.
         </audio>
         
+        <p id="autoplay-info">
+            (Nếu nhạc không tự bật, xin vui lòng nhấn nút Play ở trên.)
+        </p>
+
         <h2>Lời Anh Muốn Gửi Đến Em</h2>
         
         <p id="message-display"></p>
@@ -102,7 +106,13 @@
             }
         }
 
-        // Bắt đầu hiệu ứng
+        // Khởi động nhạc (thử tự động phát)
+        document.getElementById('background-music').play().catch(error => {
+            // Xử lý lỗi nếu trình duyệt chặn autoplay
+            console.log("Autoplay bị chặn.");
+        });
+
+        // Bắt đầu hiệu ứng đánh máy
         typeWriter();
     </script>
 </body>
