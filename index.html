@@ -9,7 +9,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 50px 20px;
-            background-color: #ffe0f0; /* Nền hồng nhẹ nhàng */
+            background-color: #ffe0f0; 
             color: #4a4a4a;
             line-height: 1.8;
             text-align: center;
@@ -24,13 +24,13 @@
             text-align: left;
         }
         h2 {
-            color: #d6338a; /* Màu hồng đậm */
+            color: #d6338a;
             border-bottom: 2px solid #ff99c8;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
         #message-display {
-            white-space: pre-wrap; /* Hiển thị giống như đang đánh máy */
+            white-space: pre-wrap;
             min-height: 250px; 
             font-size: 1.1em;
             color: #333;
@@ -51,7 +51,6 @@
             width: 100%;
             margin-bottom: 20px;
         }
-        /* Thông báo nhỏ nếu nhạc không tự bật */
         #autoplay-info {
             font-size: 0.9em;
             color: #888;
@@ -61,7 +60,7 @@
 </head>
 <body>
     <div class="container">
-        <audio controls autoplay loop id="background-music">
+        <audio controls autoplay id="background-music">
             <source src="music1709.mp3" type="audio/mpeg">
             Trình duyệt của bạn không hỗ trợ phần tử audio.
         </audio>
@@ -81,13 +80,21 @@
         
         // Vùng hiển thị
         const displayElement = document.getElementById('message-display');
+        const audio = document.getElementById('background-music');
         
-        // Tốc độ hiển thị: 50ms cho mỗi ký tự (Tốc độ dễ đọc)
+        // Tốc độ hiển thị: 50ms cho mỗi ký tự
         const delay = 50; 
 
         let index = 0;
         let cursor = document.createElement('span');
         cursor.classList.add('cursor');
+
+        // Hàm xử lý việc lặp lại nhạc
+        const audioLoopHandler = () => {
+            // Đặt thời gian phát lại về 0 và play
+            audio.currentTime = 0;
+            audio.play();
+        };
         
         // Thêm con trỏ vào cuối cùng ban đầu
         displayElement.appendChild(cursor);
@@ -101,13 +108,21 @@
                 // Thiết lập hẹn giờ để gọi lại hàm này sau 'delay'
                 setTimeout(typeWriter, delay);
             } else {
-                // Hoàn thành: Xóa con trỏ nhấp nháy
-                cursor.remove();
+                // *** KHI DÒNG CHỮ CHẠY XONG ***
+                cursor.remove(); // Xóa con trỏ
+                
+                // 1. Dừng nhạc
+                audio.pause(); 
+                // 2. Xóa sự kiện lắng nghe lặp lại nhạc (để nhạc không tự bật lại)
+                audio.removeEventListener('ended', audioLoopHandler);
             }
         }
 
-        // Khởi động nhạc (thử tự động phát)
-        document.getElementById('background-music').play().catch(error => {
+        // Khởi tạo vòng lặp: Khi nhạc kết thúc (chỉ xảy ra khi chữ chưa chạy xong), tự động bật lại
+        audio.addEventListener('ended', audioLoopHandler);
+        
+        // Cố gắng tự động phát nhạc khi trang được tải
+        audio.play().catch(error => {
             // Xử lý lỗi nếu trình duyệt chặn autoplay
             console.log("Autoplay bị chặn.");
         });
