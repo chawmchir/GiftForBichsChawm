@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gứi Bích Chăm</title>
+    <title>Gửi Bích Chăm</title>
     <style>
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -14,11 +14,11 @@
             margin: 0;
             background-color: #fce4ec; 
             color: #4a4a4a;
-            overflow: hidden; /* Quan trọng để trái tim bay ra ngoài mà không tạo scrollbar */
+            overflow: hidden; 
         }
 
         .container {
-            position: relative; /* Quan trọng để trái tim bay trong container */
+            position: relative; 
             background-color: #ffffff;
             padding: 40px;
             border-radius: 15px;
@@ -27,7 +27,7 @@
             width: 90%;
             text-align: center;
             border: 3px solid #ff80ab;
-            z-index: 1; /* Đảm bảo nội dung chính ở trên trái tim */
+            z-index: 1; 
         }
 
         h1 {
@@ -47,8 +47,8 @@
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 2; /* Đảm bảo nút ở trên trái tim */
-            position: relative; /* Để z-index có hiệu lực */
+            z-index: 2; 
+            position: relative; 
         }
 
         #startButton:hover {
@@ -65,7 +65,7 @@
             margin-top: 20px;
             border-left: 3px solid #f06292;
             padding-left: 15px;
-            position: relative; /* Để đảm bảo trái tim không che chữ */
+            position: relative; 
             z-index: 2;
         }
 
@@ -86,13 +86,13 @@
         /* Style cho trái tim bay */
         .heart {
             position: absolute;
-            font-size: 1.2em; /* Kích thước trái tim */
-            color: #ff80ab; /* Màu hồng */
+            font-size: 1.2em; 
+            color: #ff80ab; 
             opacity: 0;
-            animation: floatUp 4s forwards; /* Thời gian bay và giữ trạng thái cuối */
-            pointer-events: none; /* Không chặn sự kiện click */
-            text-shadow: 0 0 5px rgba(255, 128, 171, 0.5); /* Lấp lánh nhẹ */
-            z-index: 0; /* Đảm bảo trái tim ở dưới lớp chữ */
+            animation: floatUp 4s forwards; 
+            pointer-events: none; 
+            text-shadow: 0 0 5px rgba(255, 128, 171, 0.5); 
+            z-index: 0; 
         }
 
         @keyframes floatUp {
@@ -109,12 +109,47 @@
                 opacity: 0;
             }
         }
+
+        /* --- HIỆU ỨNG ĐÓNG MÀN (KÉO RÈM) --- */
+        #curtain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #d81b60; /* Màu rèm (hồng đậm) */
+            z-index: 999; 
+            transform: translateY(100%); /* Ban đầu rèm nằm dưới màn hình */
+            transition: transform 2s ease-in-out; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2em;
+            opacity: 0; /* Ban đầu ẩn */
+        }
+
+        #curtain-overlay.close {
+            transform: translateY(0); /* Kéo rèm lên che kín màn hình */
+            opacity: 1;
+        }
+
+        #curtain-overlay .message {
+            opacity: 0;
+            transition: opacity 0.5s ease-in 1.5s; /* Hiện thông báo sau khi rèm kéo gần xong */
+            text-align: center;
+        }
+        
+        #curtain-overlay.close .message {
+            opacity: 1;
+        }
+
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Gửi BichsChawm💕</h1>
+        <h1>Gửi BichsChawm💗</h1>
         
         <button id="startButton">Bấm vào đây để mở</button>
         
@@ -126,58 +161,68 @@
         </audio>
     </div>
 
+    <div id="curtain-overlay">
+        <div class="message">
+            Cảm ơn em vì tất cả! <br> Mong em đọc xong sẽ phần nào hiểu💗
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const textElement = document.getElementById('typewriter-text');
             const startButton = document.getElementById('startButton');
             const music = document.getElementById('background-music');
             const container = document.querySelector('.container');
+            const curtain = document.getElementById('curtain-overlay'); 
 
             const TYPING_SPEED = 50; 
             let index = 0;
-            let heartInterval; // Để lưu ID của setInterval tạo trái tim
+            let heartInterval; 
             
             const fullText = "Anh chờ em ngủ anh mới dám nói, anh nói xong anh biết chắc là sáng mai em chỉ trả lời một cái sticker rồi xong, nhưng mong là em sẽ đọc hết đoạn tin nhắn này của anh, xem xong em không trả lời cũng được. Nhưng mà chỉ mong em sẽ phần nào hiểu cho anh hơn, anh cũng chỉ là thằng trãi qua đau khổ đi tìm hạnh phúc thôi, tự hỏi nếu như một ngày anh thử im lặng thì trong khoảng lặng đó em có chút nào bận tâm hay suy nghĩ nhắn cho anh hay không, không phải anh bắt em phải chủ động nhắn cho anh nhưng mà chỉ cần một câu hỏi han anh thôi cũng được rồi. Anh là một đứa hay suy nghĩ nhiều chắc em cũng biết, tình yêu mà đâu phải lúc nào rãnh mới nhắn tin cho nhau đâu, hạnh phúc của anh đơn giản chỉ từ những lời quan tâm nhỏ nhặt thôi. Anh biết em cũng chỉ là chập chửng tập yêu nên anh cũng muốn nói ra để em hiểu anh hơn, yêu em không biết cất đâu cho hết nhưng anh cũng cần sự cảm thông thấu hiểu từ em như cách anh cũng đang mỗi ngày tìm hiểu, cảm thông, thấu hiểu cho em. Anh đã coi em là tất cả, là tương lai của anh nên anh không muốn vì một khoảnh khắc tồi tệ mà bỏ lỡ nhau. Nếu em đọc đến đây thì em cũng phần nào hiểu rồi, anh không muốn em bé của anh vì anh mà phải buồn vì điều gì hết, anh cũng chỉ muốn mỗi khi anh vô tình làm em buồn thì em sẽ cùng anh ngồi lại nói rõ mọi chuyện, và tất nhiên trước đó chắc chắn anh sẽ tự biết lỗi của mình. Cảm ơn đã đọc đến đây. Yêu em nhiều lắm💕";
             
             function createHeart() {
                 const heart = document.createElement('span');
                 heart.classList.add('heart');
-                heart.innerHTML = '💗'; // Biểu tượng trái tim lấp lánh
+                heart.innerHTML = '💗'; 
 
-                const isLeft = Math.random() < 0.5; // Random xem bay bên trái hay phải
+                const isLeft = Math.random() < 0.5; 
                 let startX;
                 if (isLeft) {
-                    startX = -20 + Math.random() * 50; // Vị trí ban đầu hơi lệch ra ngoài bên trái
+                    startX = -20 + Math.random() * 50; 
                 } else {
-                    startX = container.offsetWidth - 30 - Math.random() * 50; // Vị trí ban đầu hơi lệch ra ngoài bên phải
+                    startX = container.offsetWidth - 30 - Math.random() * 50; 
                 }
 
-                // Vị trí y ban đầu của trái tim sẽ là ngay dưới dòng chữ đang hiển thị
+                // Tính toán vị trí Y ban đầu để trái tim bay lên từ khu vực chữ
                 const textRect = textElement.getBoundingClientRect();
                 const containerRect = container.getBoundingClientRect();
-                const startY = textRect.bottom - containerRect.top; // bottom của text so với top của container
+                const startY = textRect.bottom - containerRect.top; 
 
                 heart.style.left = `${startX}px`;
                 heart.style.top = `${startY}px`;
                 
-                // Random nhẹ x-offset để trái tim bay lung tung hơn
-                const xOffset = (Math.random() - 0.5) * 100; // -50px đến 50px
+                const xOffset = (Math.random() - 0.5) * 100; 
                 heart.style.setProperty('--x-offset', `${xOffset}px`);
 
                 container.appendChild(heart);
 
-                // Xóa trái tim sau khi animation kết thúc để tránh làm đầy DOM
                 heart.addEventListener('animationend', () => {
                     heart.remove();
                 });
+            }
+
+            function closeCurtain() {
+                // Kích hoạt animation kéo rèm
+                curtain.classList.add('close');
             }
 
             function typeWriter() {
                 if (index < fullText.length) {
                     textElement.innerHTML += fullText.charAt(index);
                     index++;
-                    // Tạo trái tim sau mỗi vài ký tự hoặc theo một tần suất nhất định
-                    if (index % 3 === 0) { // Tạo trái tim sau mỗi 3 ký tự
+                    // Tạo trái tim sau mỗi 3 ký tự
+                    if (index % 3 === 0) { 
                         createHeart();
                     }
                     setTimeout(typeWriter, TYPING_SPEED);
@@ -186,7 +231,10 @@
                     music.pause();
                     music.currentTime = 0; 
                     textElement.classList.remove('typing'); 
-                    clearInterval(heartInterval); // Dừng tạo trái tim khi chữ kết thúc
+                    clearInterval(heartInterval); 
+                    
+                    // Chờ 1 giây trước khi kéo rèm
+                    setTimeout(closeCurtain, 1000); 
                 }
             }
 
@@ -197,14 +245,13 @@
                 textElement.innerHTML = '';
                 textElement.classList.add('typing'); 
 
-                // Lỗi chặn Autoplay được giải quyết bằng tương tác này
+                // Phát nhạc (được phép do tương tác của người dùng)
                 music.play().catch(e => console.error("Lỗi phát nhạc:", e)); 
                 
                 index = 0;
                 typeWriter();
 
-                // Bắt đầu tạo trái tim liên tục trong khi chữ đang chạy
-                // Cứ 150ms tạo một trái tim mới
+                // Bắt đầu tạo trái tim sau mỗi 150ms
                 heartInterval = setInterval(createHeart, 150); 
 
             }, { once: true }); 
