@@ -1,0 +1,52 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Ngăn cuộn trang */
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    font-family: sans-serif;
+}
+
+#container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+#animationCanvas {
+    display: block;
+    background-color: black;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    z-index: 10; /* Đảm bảo màn hình chờ ở trên cùng */
+}
+
+#start-button {
+    padding: 15px 30px;
+    font-size: 24px;
+    cursor: pointer;
+    background-color: #ff007f; /* Hồng lấp lánh */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 20px #ff007f;
+    transition: transform 0.2s;
+}
+
+#start-button:hover {
+    transform: scale(1.05);
+}
