@@ -1,4 +1,4 @@
-// Thiết lập Canvas
+// Thiết lập Canvas và các phần tử
 const canvas = document.getElementById('animationCanvas');
 const ctx = canvas.getContext('2d');
 const startButton = document.getElementById('start-button');
@@ -13,9 +13,38 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+// --- Tải Hình Ảnh (Assets) ---
+const ASSETS = {
+    lego1: new Image(),
+    lego2: new Image(),
+    bullet: new Image()
+};
+
+let assetsLoadedCount = 0;
+const totalAssets = Object.keys(ASSETS).length;
+
+function loadAssets() {
+    return new Promise((resolve) => {
+        Object.keys(ASSETS).forEach(key => {
+            ASSETS[key].onload = () => {
+                assetsLoadedCount++;
+                if (assetsLoadedCount === totalAssets) {
+                    resolve();
+                }
+            };
+        });
+        
+        // Gán nguồn hình ảnh - CHẮC CHẮN PHẢI TỒN TẠI TRONG THƯ MỤC assets/
+        ASSETS.lego1.src = 'assets/lego1.png'; 
+        ASSETS.lego2.src = 'assets/lego2.png';
+        ASSETS.bullet.src = 'assets/bullet.png';
+    });
+}
+
+
 // --- Cấu hình trò chơi ---
-const CHAR_SIZE = 30; // Kích thước Lego (đại diện cho 3cm)
-const BULLET_SIZE = 5;
+const CHAR_SIZE = 60; // Kích thước hiển thị (đã tăng để dễ nhìn chi tiết)
+const BULLET_SIZE = 15;
 const GAME_DURATION = 15000; // 15 giây
 const SCENE_TIMES = {
     FLY_UP_END: 1000,
@@ -27,44 +56,44 @@ const SCENE_TIMES = {
 
 // --- Đối tượng Lego ---
 class Lego {
-    constructor(x, y, color, targetY, sayHiFrame) {
+    constructor(x, y, image, targetY, isWaving) {
         this.x = x;
         this.y = canvas.height + CHAR_SIZE; // Bắt đầu từ dưới màn hình
-        this.color = color;
+        this.image = image;
         this.targetY = targetY; // Vị trí dừng
         this.vy = -3; // Tốc độ bay lên
-        this.isSayingHi = false;
-        this.sayHiFrame = sayHiFrame; // Dùng để tạo hiệu ứng tay vẫy
-        this.handAngle = 0;
+        this.isWaving = isWaving; // Nhân vật 1 vẫy tay
+        this.rotationAngle = 0; // Để tạo hiệu ứng bay lên thú vị hơn
     }
 
     update() {
         if (this.y > this.targetY) {
             this.y += this.vy;
+            // Xoay nhẹ khi bay lên
+            this.rotationAngle = Math.sin((Date.now() / 200) + this.x) * 0.05; 
             if (this.y < this.targetY) this.y = this.targetY; // Dừng lại
-        }
-        if (this.isSayingHi) {
-            this.handAngle = Math.sin(Date.now() / 150) * Math.PI / 8; // Vẫy tay nhẹ
+        } else {
+            this.rotationAngle = 0; // Dừng xoay khi đã đến nơi
         }
     }
 
     draw() {
-        ctx.fillStyle = this.color;
+        ctx.save();
+        // Dịch chuyển và Xoay
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotationAngle);
         
-        // Vẽ thân (hình vuông)
-        ctx.fillRect(this.x - CHAR_SIZE / 2, this.y - CHAR_SIZE / 2, CHAR_SIZE, CHAR_SIZE);
+        // Vẽ hình ảnh Lego
+        // (Vị trí -CHAR_SIZE/2 để hình ảnh được căn giữa tại (this.x, this.y))
+        ctx.drawImage(this.image, -CHAR_SIZE / 2, -CHAR_SIZE / 2, CHAR_SIZE, CHAR_SIZE);
         
-        // Vẽ tay cầm súng (đơn giản hóa)
-        ctx.fillStyle = 'gray';
-        ctx.fillRect(this.x + CHAR_SIZE / 4, this.y, 5, 10); 
+        ctx.restore();
         
-        // Vẽ tay vẫy (chỉ cho Lego 1)
-        if (this.sayHiFrame) {
-            ctx.save();
-            ctx.translate(this.x - CHAR_SIZE / 4, this.y);
-            ctx.rotate(this.handAngle);
-            ctx.fillRect(0, 0, 5, 10);
-            ctx.restore();
+        // Ghi chữ "Hi" (thay cho hiệu ứng tay vẫy phức tạp)
+        if (this.isWaving && Date.now() - startTime > SCENE_TIMES.SAY_HI_START && Date.now() - startTime < SCENE_TIMES.SHOOT_START) {
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'yellow';
+            ctx.fillText('👋 Hi!', this.x + CHAR_SIZE / 2, this.y - CHAR_SIZE / 2);
         }
     }
 }
@@ -74,6 +103,7 @@ class Bullet {
     constructor(startX, startY, targetX, targetY, speed) {
         this.x = startX;
         this.y = startY;
+        this.image = ASSETS.bullet; // Sử dụng hình ảnh đạn
         this.speed = speed;
         const dx = targetX - startX;
         const dy = targetY - startY;
@@ -87,7 +117,7 @@ class Bullet {
         this.x += this.vx;
         this.y += this.vy;
         
-        // Kiểm tra va chạm (nếu vượt quá thời gian va chạm dự kiến)
+        // Kiểm tra va chạm
         if (Date.now() - startTime > SCENE_TIMES.IMPACT) {
             this.isAlive = false;
         }
@@ -95,10 +125,11 @@ class Bullet {
 
     draw() {
         if (!this.isAlive) return;
-        ctx.fillStyle = 'yellow';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, BULLET_SIZE, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        // Vẽ hình ảnh đạn
+        ctx.drawImage(this.image, -BULLET_SIZE / 2, -BULLET_SIZE / 2, BULLET_SIZE, BULLET_SIZE);
+        ctx.restore();
     }
 }
 
@@ -115,7 +146,7 @@ class Particle {
         this.isHeart = type === 'heart';
         this.text = 'i love you so much Bich Cham';
         this.opacitySpeed = Math.random() * 0.02 + 0.01;
-        this.luminous = Math.random() < 0.3; // Hiệu ứng lấp lánh
+        this.luminous = Math.random() < 0.4; // Hiệu ứng lấp lánh
     }
 
     update() {
@@ -130,32 +161,28 @@ class Particle {
         
         ctx.globalAlpha = this.alpha;
         
+        if (this.luminous) {
+             // Tạo hiệu ứng lấp lánh mạnh hơn
+             ctx.shadowColor = this.isHeart ? '#ff007f' : 'white';
+             ctx.shadowBlur = this.luminous ? 15 : 0;
+        } else {
+             ctx.shadowBlur = 0;
+        }
+        
         if (this.isHeart) {
-            // Vẽ trái tim (đơn giản hóa thành hình tròn/màu)
-            ctx.fillStyle = `rgba(255, ${200 + Math.floor(Math.random() * 55)}, 200, ${this.alpha})`;
-            if (this.luminous) {
-                 ctx.shadowColor = 'white';
-                 ctx.shadowBlur = 10;
-            } else {
-                 ctx.shadowBlur = 0;
-            }
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
-            ctx.fill();
+            // Vẽ trái tim (vẫn là hình cơ bản nhưng có lấp lánh)
+            ctx.fillStyle = `rgba(255, 50, 150, ${this.alpha})`;
+            ctx.font = `${this.size}px Arial`;
+            ctx.fillText('♥', this.x, this.y); // Sử dụng ký tự trái tim unicode
         } else {
             // Vẽ chữ
-            ctx.font = `${this.size}px Arial`;
+            ctx.font = `${this.size * 0.8}px 'Comic Sans MS', cursive`;
             ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-            if (this.luminous && Math.random() < 0.5) { // Lấp lánh ngẫu nhiên
-                 ctx.shadowColor = 'yellow';
-                 ctx.shadowBlur = 15;
-            } else {
-                 ctx.shadowBlur = 0;
-            }
             ctx.fillText(this.text, this.x, this.y);
         }
+        
         ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0; // Tắt shadow để không ảnh hưởng đến các đối tượng khác
+        ctx.shadowBlur = 0; // Tắt shadow cho các đối tượng khác
     }
 }
 
@@ -167,10 +194,8 @@ const bullets = [];
 const particles = [];
 let gameRunning = false;
 
-// Nhân vật Lego
-const lego1 = new Lego(canvas.width / 3, canvas.height * 0.7, 'blue', canvas.height * 0.7, true);
-const lego2 = new Lego(canvas.width * 2 / 3, canvas.height * 0.7, 'red', canvas.height * 0.7, false);
-legos.push(lego1, lego2);
+// Nhân vật Lego (sẽ được khởi tạo sau khi assets load)
+let lego1, lego2;
 
 
 // --- Hàm Game Loop chính ---
@@ -204,13 +229,12 @@ function gameLoop(timestamp) {
     if (Date.now() - startTime > SCENE_TIMES.IMPACT && Date.now() - startTime < SCENE_TIMES.END_SCENE) {
         // Tạo 5 trái tim và 1 dòng chữ ngẫu nhiên mỗi frame
         for (let i = 0; i < 5; i++) {
-            particles.push(new Particle(canvas.width / 2 + (Math.random() - 0.5) * 50, canvas.height / 2, 'heart'));
+            particles.push(new Particle(canvas.width / 2 + (Math.random() - 0.5) * canvas.width * 0.4, canvas.height, 'heart'));
         }
         if (Math.random() < 0.1) { // Tỉ lệ thấp hơn cho chữ
             particles.push(new Particle(Math.random() * canvas.width, canvas.height, 'text'));
         }
     }
-
 
     animationFrameId = requestAnimationFrame(gameLoop);
 }
@@ -226,26 +250,31 @@ function startScene() {
 
     // 2. Lego 1 say hi
     setTimeout(() => {
-        lego1.isSayingHi = true;
+        // Hiệu ứng "Hi" được vẽ trong Lego.draw()
     }, SCENE_TIMES.SAY_HI_START);
 
     // 3. Cả hai bắn nhau
     setTimeout(() => {
-        lego1.isSayingHi = false;
+        // Tọa độ bắn (từ vị trí Lego)
+        const shootPos1 = { x: lego1.x + CHAR_SIZE / 2, y: lego1.y };
+        const shootPos2 = { x: lego2.x - CHAR_SIZE / 2, y: lego2.y };
+        
+        // Tọa độ va chạm
+        const impactPoint = { x: canvas.width / 2, y: lego1.y };
+
         // Đạn 1: từ Lego 1 đến giữa
-        bullets.push(new Bullet(lego1.x + CHAR_SIZE/2, lego1.y, canvas.width / 2, lego1.y, 8));
+        bullets.push(new Bullet(shootPos1.x, shootPos1.y, impactPoint.x, impactPoint.y, 15));
         // Đạn 2: từ Lego 2 đến giữa
-        bullets.push(new Bullet(lego2.x - CHAR_SIZE/2, lego2.y, canvas.width / 2, lego2.y, 8));
+        bullets.push(new Bullet(shootPos2.x, shootPos2.y, impactPoint.x, impactPoint.y, 15));
     }, SCENE_TIMES.SHOOT_START);
     
     // 4. Va chạm, Pháo hoa, Nhạc Nổ
     setTimeout(() => {
-        // Vị trí nổ: chính giữa
         const impactX = canvas.width / 2;
         const impactY = lego1.y;
 
-        // Bắt đầu tạo pháo hoa ban đầu (hàng trăm hạt)
-        for (let i = 0; i < 200; i++) {
+        // Bắt đầu tạo pháo hoa ban đầu (150 hạt)
+        for (let i = 0; i < 150; i++) {
             particles.push(new Particle(impactX, impactY, Math.random() < 0.8 ? 'heart' : 'text'));
         }
         
@@ -260,12 +289,26 @@ function startScene() {
         music.pause();
         music.currentTime = 0;
         gameRunning = false;
-        // Có thể hiện màn hình kết thúc tại đây nếu muốn
+        // Hiện màn hình chúc mừng nếu cần
     }, SCENE_TIMES.END_SCENE);
 
     // Bắt đầu vòng lặp game
     gameLoop(0);
 }
 
-// Bắt đầu khi người dùng nhấn nút
-startButton.addEventListener('click', startScene);
+// --- Khởi tạo sau khi tải Assets ---
+startButton.addEventListener('click', () => {
+    // Tải hình ảnh trước
+    loadAssets().then(() => {
+        // Khởi tạo đối tượng Lego sau khi hình ảnh đã tải
+        const targetY = canvas.height * 0.7; // Vị trí dừng
+        lego1 = new Lego(canvas.width / 3, targetY, ASSETS.lego1, targetY, true);
+        lego2 = new Lego(canvas.width * 2 / 3, targetY, ASSETS.lego2, targetY, false);
+        legos.push(lego1, lego2);
+        
+        startScene();
+    }).catch(e => {
+        console.error("Lỗi tải hình ảnh:", e);
+        alert("Không thể tải các hình ảnh (lego1.png, lego2.png, bullet.png). Vui lòng kiểm tra lại thư mục assets!");
+    });
+});
